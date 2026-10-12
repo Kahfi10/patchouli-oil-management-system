@@ -10,7 +10,7 @@ import { EscrowOrdersScreen } from './src/features/escrow-orders/EscrowOrdersScr
 import { LeafDiagnosticScreen } from './src/features/leaf-diagnostic/LeafDiagnosticScreen';
 import { AppEntranceScreen } from './src/features/onboarding/AppEntranceScreen';
 import { NotificationsModal } from './src/shared/components/NotificationsModal';
-import { PageTransitionLoader } from './src/shared/components/PageTransitionLoader';
+import { PageSkeletonLoader } from './src/shared/components/PageSkeletonLoader';
 import { MOCK_NOTIFICATIONS, AppNotification } from './src/data/mockData';
 import { loadSavedNotifications, saveNotifications } from './src/shared/utils/storage';
 import { getAppleTheme, ThemeMode } from './src/shared/theme/colors';
@@ -127,10 +127,9 @@ export default function App() {
             mode={themeMode}
           />
 
-          {/* Micro Page Transition Loader with Textless Logo Emblem */}
+          {/* Minimalist Skeleton Transition with Logo Watermark */}
           {isPageTransitioning && (
-            <PageTransitionLoader
-              targetTab={transitionTargetTab}
+            <PageSkeletonLoader
               mode={themeMode}
               onFinish={() => setIsPageTransitioning(false)}
             />
