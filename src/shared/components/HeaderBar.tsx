@@ -1,18 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Bell, Sun, Moon, ShieldCheck } from 'lucide-react-native';
+import { Bell, Sun, Moon, ShieldCheck, HelpCircle } from 'lucide-react-native';
 import { getAppleTheme, ThemeMode } from '../theme/colors';
 import { SANS_FONT } from '../theme/typography';
 
 interface HeaderBarProps {
   mode: ThemeMode;
   onToggleMode: () => void;
+  onOpenEntrance?: () => void;
   activeNotificationsCount?: number;
 }
 
 export const HeaderBar: React.FC<HeaderBarProps> = ({
   mode,
   onToggleMode,
+  onOpenEntrance,
   activeNotificationsCount = 2,
 }) => {
   const theme = getAppleTheme(mode);
@@ -35,6 +37,16 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
       {/* Apple Style Icon Buttons */}
       <View style={styles.actionsRow}>
+        {onOpenEntrance && (
+          <TouchableOpacity
+            activeOpacity={0.65}
+            onPress={onOpenEntrance}
+            style={[styles.iconButton, { backgroundColor: theme.surfaceSecondary }]}
+          >
+            <HelpCircle size={17} color={theme.text} strokeWidth={2} />
+          </TouchableOpacity>
+        )}
+
         <TouchableOpacity
           activeOpacity={0.65}
           onPress={onToggleMode}
