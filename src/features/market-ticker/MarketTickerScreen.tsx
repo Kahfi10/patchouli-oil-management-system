@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { ArrowUpRight, ArrowDownRight, ChevronRight, Calculator, ShoppingBag, Layers, Stethoscope } from 'lucide-react-native';
+import { ArrowUpRight, ArrowDownRight, ChevronRight, Calculator, ShoppingBag, Layers, Stethoscope, Clock, TrendingUp, Sparkles } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { InteractivePriceChart } from '../../shared/components/InteractivePriceChart';
 import { REGIONAL_PRICES, RegionalPrice } from '../../data/mockData';
@@ -20,17 +20,57 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
   const theme = getAppleTheme(mode);
   const [selectedRegion, setSelectedRegion] = useState<RegionalPrice>(REGIONAL_PRICES[0]);
 
+  // Calculate national average
+  const totalSum = REGIONAL_PRICES.reduce((acc, curr) => acc + curr.pricePerKg, 0);
+  const nationalAvg = Math.round(totalSum / REGIONAL_PRICES.length);
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.canvas }]} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.canvas }]}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* iOS Large Title Section */}
       <View style={styles.titleSection}>
-        <Text style={[styles.largeTitle, { color: theme.text }]}>Pasar Nilam</Text>
-        <Text style={[styles.titleCaption, { color: theme.textSecondary }]}>
-          Pembaruan {selectedRegion.lastUpdated}
-        </Text>
+        <View style={{ flex: 1 }}>
+          <Text style={[styles.largeTitle, { color: theme.text }]}>Pasar Nilam</Text>
+          <Text style={[styles.titleCaption, { color: theme.textSecondary }]}>
+            Pembaruan bursa regional • {selectedRegion.lastUpdated}
+          </Text>
+        </View>
+        <View style={[styles.liveStatusBadge, { backgroundColor: theme.accentTint }]}>
+          <View style={[styles.liveDot, { backgroundColor: theme.accent }]} />
+          <Text style={[styles.liveStatusText, { color: theme.accent }]}>Live SNI</Text>
+        </View>
+      </View>
+
+      {/* National Overview Bento Bar */}
+      <View style={[styles.nationalBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <View style={styles.nationalCell}>
+          <Text style={[styles.nationalLabel, { color: theme.textSecondary }]}>Rata-Rata Nasional</Text>
+          <Text style={[styles.nationalValue, { color: theme.text }]}>{formatRupiah(nationalAvg)}</Text>
+        </View>
+        <View style={[styles.nationalDivider, { backgroundColor: theme.border }]} />
+        <View style={styles.nationalCell}>
+          <Text style={[styles.nationalLabel, { color: theme.textSecondary }]}>Harga Tertinggi</Text>
+          <Text style={[styles.nationalValue, { color: theme.accent }]}>Rp 1.420.000</Text>
+          <Text style={[styles.nationalSub, { color: theme.textTertiary }]}>Aceh (PA 34%)</Text>
+        </View>
+        <View style={[styles.nationalDivider, { backgroundColor: theme.border }]} />
+        <View style={styles.nationalCell}>
+          <Text style={[styles.nationalLabel, { color: theme.textSecondary }]}>Tren Pasar</Text>
+          <View style={styles.trendRow}>
+            <TrendingUp size={13} color={theme.accent} strokeWidth={2.5} />
+            <Text style={[styles.trendText, { color: theme.accent }]}>Stabil Naik</Text>
+          </View>
+          <Text style={[styles.nationalSub, { color: theme.textTertiary }]}>Permintaan Ekspor</Text>
+        </View>
       </View>
 
       {/* Apple iOS Segmented Control */}
+      <Text style={[styles.sectionHeading, { color: theme.textSecondary, marginTop: 18 }]}>
+        SENTRA PRODUKSI REGIONAL
+      </Text>
       <View style={[styles.segmentedControl, { backgroundColor: theme.surfaceSecondary }]}>
         {REGIONAL_PRICES.map((item) => {
           const isSelected = selectedRegion.id === item.id;
@@ -48,7 +88,7 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
                 style={[
                   styles.segmentLabel,
                   { color: isSelected ? theme.text : theme.textSecondary },
-                  isSelected && { fontWeight: '600' },
+                  isSelected && { fontWeight: '700' },
                 ]}
                 numberOfLines={1}
               >
@@ -104,10 +144,25 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
           mode={mode}
           regionName={selectedRegion.region}
         />
+
+        {/* Quick Shortcut: Calculate with this price */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => onNavigateTab('kalkulator')}
+          style={[styles.calcShortcutBtn, { backgroundColor: theme.surfaceSecondary }]}
+        >
+          <Calculator size={15} color={theme.accent} strokeWidth={2} />
+          <Text style={[styles.calcShortcutText, { color: theme.text }]}>
+            Simulasi Laba dengan Harga {selectedRegion.region.split(' ')[0]}
+          </Text>
+          <ChevronRight size={15} color={theme.textTertiary} />
+        </TouchableOpacity>
       </BentoCard>
 
       {/* Apple Inset Grouped Quick Actions */}
-      <Text style={[styles.sectionHeading, { color: theme.textSecondary }]}>OPERASIONAL TANI</Text>
+      <Text style={[styles.sectionHeading, { color: theme.textSecondary, marginTop: 22 }]}>
+        MENU OPERASIONAL TANI
+      </Text>
       
       <View style={[styles.groupedList, { backgroundColor: theme.surface, borderColor: theme.border }]}>
         <TouchableOpacity
@@ -116,12 +171,29 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
           style={[styles.listItem, { borderBottomColor: theme.border }]}
         >
           <View style={[styles.listIconBox, { backgroundColor: theme.oilAmberTint }]}>
-            <Calculator size={18} color={theme.oilAmber} strokeWidth={2} />
+            <Calculator size={19} color={theme.oilAmber} strokeWidth={2} />
           </View>
           <View style={styles.listTextContainer}>
             <Text style={[styles.listTitle, { color: theme.text }]}>Kalkulator Rendemen & HPP</Text>
             <Text style={[styles.listSubtitle, { color: theme.textSecondary }]}>
-              Simulasi hasil minyak dan biaya operasional suling
+              Hitung rendemen daun, biaya suling, & margin laba
+            </Text>
+          </View>
+          <ChevronRight size={18} color={theme.textTertiary} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.65}
+          onPress={() => onNavigateTab('ketel')}
+          style={[styles.listItem, { borderBottomColor: theme.border }]}
+        >
+          <View style={[styles.listIconBox, { backgroundColor: theme.surfaceSecondary }]}>
+            <Clock size={19} color={theme.text} strokeWidth={2} />
+          </View>
+          <View style={styles.listTextContainer}>
+            <Text style={[styles.listTitle, { color: theme.text }]}>Stopwatch Ketel & Batch Suling</Text>
+            <Text style={[styles.listSubtitle, { color: theme.textSecondary }]}>
+              Monitoring fase distilasi 6-8 jam & Paspor QR
             </Text>
           </View>
           <ChevronRight size={18} color={theme.textTertiary} />
@@ -133,12 +205,12 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
           style={[styles.listItem, { borderBottomColor: theme.border }]}
         >
           <View style={[styles.listIconBox, { backgroundColor: theme.accentTint }]}>
-            <Stethoscope size={18} color={theme.accent} strokeWidth={2} />
+            <Stethoscope size={19} color={theme.accent} strokeWidth={2} />
           </View>
           <View style={styles.listTextContainer}>
             <Text style={[styles.listTitle, { color: theme.text }]}>Diagnosa Daun Nilam</Text>
             <Text style={[styles.listSubtitle, { color: theme.textSecondary }]}>
-              Inspeksi penyakit layu bakteri (Ralstonia) & kesiapan suling
+              Inspeksi penyakit layu bakteri & kesiapan petik daun
             </Text>
           </View>
           <ChevronRight size={18} color={theme.textTertiary} />
@@ -147,60 +219,20 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
         <TouchableOpacity
           activeOpacity={0.65}
           onPress={() => onNavigateTab('marketplace')}
-          style={[styles.listItem, { borderBottomColor: theme.border }]}
+          style={[styles.listItem, { borderBottomWidth: 0 }]}
         >
-          <View style={[styles.listIconBox, { backgroundColor: theme.surfaceSecondary }]}>
-            <ShoppingBag size={18} color={theme.text} strokeWidth={2} />
+          <View style={[styles.listIconBox, { backgroundColor: theme.accentTint }]}>
+            <ShoppingBag size={19} color={theme.accent} strokeWidth={2} />
           </View>
           <View style={styles.listTextContainer}>
-            <Text style={[styles.listTitle, { color: theme.text }]}>Bursa Penawaran Terbuka</Text>
+            <Text style={[styles.listTitle, { color: theme.text }]}>Bursa Minyak & Escrow</Text>
             <Text style={[styles.listSubtitle, { color: theme.textSecondary }]}>
-              Daftar lot minyak nilam terverifikasi laboratorium
-            </Text>
-          </View>
-          <ChevronRight size={18} color={theme.textTertiary} />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          activeOpacity={0.65}
-          onPress={() => onNavigateTab('ketel')}
-          style={styles.listItem}
-        >
-          <View style={[styles.listIconBox, { backgroundColor: theme.surfaceSecondary }]}>
-            <Layers size={18} color={theme.text} strokeWidth={2} />
-          </View>
-          <View style={styles.listTextContainer}>
-            <Text style={[styles.listTitle, { color: theme.text }]}>Batch Suling & QR Passport</Text>
-            <Text style={[styles.listSubtitle, { color: theme.textSecondary }]}>
-              Pencatatan produksi, stopwatch suling & label QR
+              Katalog lot minyak terverifikasi & transaksi aman
             </Text>
           </View>
           <ChevronRight size={18} color={theme.textTertiary} />
         </TouchableOpacity>
       </View>
-
-      {/* SNI Quality Standard Note Card */}
-      <Text style={[styles.sectionHeading, { color: theme.textSecondary, marginTop: 24 }]}>STANDAR MUTU SNI 06-2385-2006</Text>
-      <BentoCard mode={mode} style={styles.sniCard}>
-        <View style={styles.sniRow}>
-          <View style={styles.sniItem}>
-            <Text style={[styles.sniLabel, { color: theme.textSecondary }]}>Kadar PA Minimal</Text>
-            <Text style={[styles.sniVal, { color: theme.text }]}>&ge; 30.0%</Text>
-          </View>
-          <View style={[styles.sniDivider, { backgroundColor: theme.border }]} />
-          <View style={styles.sniItem}>
-            <Text style={[styles.sniLabel, { color: theme.textSecondary }]}>Kadar Air Maksimal</Text>
-            <Text style={[styles.sniVal, { color: theme.text }]}>&le; 1.0%</Text>
-          </View>
-          <View style={[styles.sniDivider, { backgroundColor: theme.border }]} />
-          <View style={styles.sniItem}>
-            <Text style={[styles.sniLabel, { color: theme.textSecondary }]}>Indeks Bias (20C)</Text>
-            <Text style={[styles.sniVal, { color: theme.text }]}>1.507 - 1.515</Text>
-          </View>
-        </View>
-      </BentoCard>
-
-      <View style={{ height: 32 }} />
     </ScrollView>
   );
 };
@@ -208,11 +240,17 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     paddingHorizontal: 16,
     paddingTop: 12,
+    paddingBottom: 110,
   },
   titleSection: {
-    marginBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
   },
   largeTitle: {
     fontFamily: SANS_FONT,
@@ -223,23 +261,93 @@ const styles = StyleSheet.create({
   titleCaption: {
     fontFamily: SANS_FONT,
     fontSize: 13,
+    marginTop: 3,
+  },
+  liveStatusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 14,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  liveStatusText: {
+    fontFamily: SANS_FONT,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  nationalBar: {
+    flexDirection: 'row',
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 4,
+  },
+  nationalCell: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  nationalLabel: {
+    fontFamily: SANS_FONT,
+    fontSize: 10,
+    fontWeight: '500',
+  },
+  nationalValue: {
+    fontFamily: SANS_FONT,
+    fontSize: 13,
+    fontWeight: '700',
     marginTop: 2,
+  },
+  nationalSub: {
+    fontFamily: SANS_FONT,
+    fontSize: 9,
+    marginTop: 1,
+  },
+  trendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 2,
+  },
+  trendText: {
+    fontFamily: SANS_FONT,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  nationalDivider: {
+    width: StyleSheet.hairlineWidth,
+    marginVertical: 4,
+  },
+  sectionHeading: {
+    fontFamily: SANS_FONT,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 8,
+    marginLeft: 4,
   },
   segmentedControl: {
     flexDirection: 'row',
-    borderRadius: 9,
-    padding: 2,
-    marginBottom: 14,
+    borderRadius: 12,
+    padding: 3,
+    marginBottom: 12,
   },
   segmentTab: {
     flex: 1,
-    paddingVertical: 6,
+    paddingVertical: 7,
     alignItems: 'center',
-    borderRadius: 7,
+    borderRadius: 9,
   },
   segmentActive: {
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.08,
     shadowRadius: 2,
     elevation: 2,
   },
@@ -248,7 +356,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   heroCard: {
-    marginBottom: 18,
+    padding: 16,
+    borderRadius: 18,
   },
   heroTopRow: {
     flexDirection: 'row',
@@ -259,25 +368,25 @@ const styles = StyleSheet.create({
     fontFamily: SANS_FONT,
     fontSize: 13,
     fontWeight: '500',
-    marginBottom: 4,
   },
   priceValue: {
     fontFamily: SANS_FONT,
-    fontSize: 26,
-    fontWeight: '700',
-    letterSpacing: -0.4,
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.5,
+    marginTop: 2,
   },
   priceUnit: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '400',
   },
   changeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
+    gap: 2,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   changeText: {
     fontFamily: SANS_FONT,
@@ -288,46 +397,38 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     marginVertical: 12,
   },
-  heroMetaRow: {
+  calcShortcutBtn: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginTop: 10,
   },
-  metaLabel: {
-    fontFamily: SANS_FONT,
-    fontSize: 11,
-    marginBottom: 2,
-  },
-  metaValue: {
-    fontFamily: SANS_FONT,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sectionHeading: {
+  calcShortcutText: {
+    flex: 1,
     fontFamily: SANS_FONT,
     fontSize: 12,
     fontWeight: '600',
-    letterSpacing: 0.2,
-    marginBottom: 8,
-    marginLeft: 4,
+    marginLeft: 8,
   },
   groupedList: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     overflow: 'hidden',
-    marginBottom: 8,
   },
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 13,
     paddingHorizontal: 14,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   listIconBox: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -344,31 +445,6 @@ const styles = StyleSheet.create({
     fontFamily: SANS_FONT,
     fontSize: 12,
     marginTop: 2,
-  },
-  sniCard: {
-    paddingVertical: 14,
-  },
-  sniRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  sniItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  sniLabel: {
-    fontFamily: SANS_FONT,
-    fontSize: 11,
-    marginBottom: 3,
-  },
-  sniVal: {
-    fontFamily: SANS_FONT,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  sniDivider: {
-    width: StyleSheet.hairlineWidth,
-    height: 24,
+    lineHeight: 16,
   },
 });

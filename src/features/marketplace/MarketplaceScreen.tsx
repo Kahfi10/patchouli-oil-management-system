@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
-import { ShieldCheck, CheckCircle2, ChevronRight, X, Lock } from 'lucide-react-native';
+import { ShieldCheck, CheckCircle2, ChevronRight, X, Lock, Sparkles, Filter } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { MOCK_LISTINGS, MarketListing } from '../../data/mockData';
 import { formatRupiah, formatKg, evaluatePatchouliQuality } from '../../shared/utils/formatters';
@@ -33,7 +33,7 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
       setDealSuccess(false);
       setSelectedListing(null);
       onNavigateToEscrow();
-    }, 1200);
+    }, 1100);
   };
 
   return (
@@ -42,18 +42,18 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
       <View style={styles.titleSection}>
         <Text style={[styles.largeTitle, { color: theme.text }]}>Bursa Nilam</Text>
         <Text style={[styles.titleCaption, { color: theme.textSecondary }]}>
-          Penawaran terbuka dengan verifikasi laboratorium dan garansi escrow
+          Katalog lot minyak terverifikasi lab & garansi pembayaran aman
         </Text>
       </View>
 
       {/* Apple Segmented Control Filter */}
-      <View style={[styles.segmentedControl, { backgroundColor: theme.surfaceSecondary }]}>
+      <View style={[styles.filterContainer, { backgroundColor: theme.surfaceSecondary }]}>
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setActiveFilter('ALL')}
-          style={[styles.segmentTab, activeFilter === 'ALL' && [styles.segmentActive, { backgroundColor: theme.surface }]]}
+          style={[styles.filterTab, activeFilter === 'ALL' && [styles.filterTabActive, { backgroundColor: theme.surface }]]}
         >
-          <Text style={[styles.segmentLabel, { color: activeFilter === 'ALL' ? theme.text : theme.textSecondary }]}>
+          <Text style={[styles.filterLabel, { color: activeFilter === 'ALL' ? theme.text : theme.textSecondary }, activeFilter === 'ALL' && { fontWeight: '700' }]}>
             Semua Lot ({MOCK_LISTINGS.length})
           </Text>
         </TouchableOpacity>
@@ -61,9 +61,9 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setActiveFilter('PA_SUPER')}
-          style={[styles.segmentTab, activeFilter === 'PA_SUPER' && [styles.segmentActive, { backgroundColor: theme.surface }]]}
+          style={[styles.filterTab, activeFilter === 'PA_SUPER' && [styles.filterTabActive, { backgroundColor: theme.surface }]]}
         >
-          <Text style={[styles.segmentLabel, { color: activeFilter === 'PA_SUPER' ? theme.text : theme.textSecondary }]}>
+          <Text style={[styles.filterLabel, { color: activeFilter === 'PA_SUPER' ? theme.text : theme.textSecondary }, activeFilter === 'PA_SUPER' && { fontWeight: '700' }]}>
             PA &ge; 33.5%
           </Text>
         </TouchableOpacity>
@@ -71,18 +71,24 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={() => setActiveFilter('STAINLESS')}
-          style={[styles.segmentTab, activeFilter === 'STAINLESS' && [styles.segmentActive, { backgroundColor: theme.surface }]]}
+          style={[styles.filterTab, activeFilter === 'STAINLESS' && [styles.filterTabActive, { backgroundColor: theme.surface }]]}
         >
-          <Text style={[styles.segmentLabel, { color: activeFilter === 'STAINLESS' ? theme.text : theme.textSecondary }]}>
+          <Text style={[styles.filterLabel, { color: activeFilter === 'STAINLESS' ? theme.text : theme.textSecondary }, activeFilter === 'STAINLESS' && { fontWeight: '700' }]}>
             Ketel Stainless
           </Text>
         </TouchableOpacity>
       </View>
 
-      {/* Feed List */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer}>
+      {/* Listings Feed */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+      >
+        <Text style={[styles.sectionHeading, { color: theme.textSecondary }]}>
+          PENAWARAN TERBUKA ({filteredListings.length} LOT)
+        </Text>
+
         {filteredListings.map((listing) => {
-          const quality = evaluatePatchouliQuality(listing.paPercentage);
           const totalVal = listing.volumeKg * listing.pricePerKg;
 
           return (
@@ -99,13 +105,13 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
                     <Text style={[styles.sellerName, { color: theme.text }]}>{listing.sellerName}</Text>
                     {listing.verifiedKYC && (
                       <View style={[styles.kycBadge, { backgroundColor: theme.accentTint }]}>
-                        <ShieldCheck size={11} color={theme.accent} strokeWidth={2.2} />
+                        <ShieldCheck size={11} color={theme.accent} strokeWidth={2.4} />
                         <Text style={[styles.kycText, { color: theme.accent }]}>KYC</Text>
                       </View>
                     )}
                   </View>
                   <Text style={[styles.regionText, { color: theme.textSecondary }]}>
-                    {listing.region} • Rating {listing.sellerRating}
+                    {listing.region} • Rating {listing.sellerRating} ★
                   </Text>
                 </View>
 
@@ -125,55 +131,54 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
                 </View>
                 <View style={[styles.specDivider, { backgroundColor: theme.border }]} />
                 <View style={styles.specCell}>
-                  <Text style={[styles.specLabel, { color: theme.textSecondary }]}>Jenis Ketel</Text>
+                  <Text style={[styles.specLabel, { color: theme.textSecondary }]}>Ketel Suling</Text>
                   <Text style={[styles.specVal, { color: theme.text }]} numberOfLines={1}>
-                    {listing.boilerType}
+                    {listing.boilerType.split(' ')[0]} {listing.boilerType.split(' ')[1] || ''}
                   </Text>
                 </View>
                 <View style={[styles.specDivider, { backgroundColor: theme.border }]} />
                 <View style={styles.specCell}>
                   <Text style={[styles.specLabel, { color: theme.textSecondary }]}>Sertifikasi</Text>
-                  <Text style={[styles.specVal, { color: theme.accent }]}>SNI A</Text>
+                  <Text style={[styles.specVal, { color: theme.accent }]}>SNI Mutu 1</Text>
                 </View>
               </View>
 
-              {/* Price & Purchase Action */}
-              <View style={styles.cardFooter}>
+              {/* Price & Action */}
+              <View style={styles.cardBottomRow}>
                 <View>
-                  <Text style={[styles.priceValue, { color: theme.text }]}>
+                  <Text style={[styles.priceTag, { color: theme.text }]}>
                     {formatRupiah(listing.pricePerKg)}
                     <Text style={[styles.priceUnit, { color: theme.textSecondary }]}> / kg</Text>
                   </Text>
-                  <Text style={[styles.totalBatchVal, { color: theme.textSecondary }]}>
+                  <Text style={[styles.totalTag, { color: theme.textTertiary }]}>
                     Total Lot: {formatRupiah(totalVal)}
                   </Text>
                 </View>
 
                 <TouchableOpacity
-                  activeOpacity={0.7}
+                  activeOpacity={0.8}
                   onPress={() => setSelectedListing(listing)}
-                  style={[styles.buyBtn, { backgroundColor: theme.accent }]}
+                  style={[styles.orderBtn, { backgroundColor: theme.accent }]}
                 >
-                  <Text style={styles.buyBtnText}>Pesan via Escrow</Text>
-                  <ChevronRight size={14} color="#FFFFFF" strokeWidth={2.5} />
+                  <Lock size={13} color="#FFFFFF" strokeWidth={2.4} />
+                  <Text style={styles.orderBtnText}>Pesan Escrow</Text>
                 </TouchableOpacity>
               </View>
             </BentoCard>
           );
         })}
-        <View style={{ height: 32 }} />
       </ScrollView>
 
-      {/* Apple Sheet Style Order Modal */}
+      {/* Escrow Detail Sheet Modal */}
       {selectedListing && (
-        <Modal visible={!!selectedListing} transparent animationType="slide">
-          <View style={styles.modalBackdrop}>
-            <View style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Modal visible={true} animationType="slide" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.modalSheet, { backgroundColor: theme.surface }]}>
               <View style={styles.modalHeader}>
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.modalTitle, { color: theme.text }]}>Konfirmasi Pesanan</Text>
+                <View>
+                  <Text style={[styles.modalTitle, { color: theme.text }]}>Konfirmasi Pesanan Escrow</Text>
                   <Text style={[styles.modalSub, { color: theme.textSecondary }]}>
-                    {selectedListing.sellerName} ({selectedListing.region})
+                    Garansi dana tertahan aman hingga uji lab selesai
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -184,34 +189,48 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
                 </TouchableOpacity>
               </View>
 
-              <View style={[styles.summaryBox, { backgroundColor: theme.surfaceSecondary }]}>
-                <View style={styles.sumRow}>
-                  <Text style={[styles.sumLabel, { color: theme.textSecondary }]}>Volume Minyak</Text>
-                  <Text style={[styles.sumVal, { color: theme.text }]}>{formatKg(selectedListing.volumeKg)}</Text>
-                </View>
-                <View style={styles.sumRow}>
-                  <Text style={[styles.sumLabel, { color: theme.textSecondary }]}>Kadar Patchouli Alcohol</Text>
-                  <Text style={[styles.sumVal, { color: theme.accent, fontWeight: '700' }]}>
-                    {selectedListing.paPercentage}%
+              {/* Order Summary Inset */}
+              <View style={[styles.orderSummaryCard, { backgroundColor: theme.surfaceSecondary }]}>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Penjual</Text>
+                  <Text style={[styles.summaryValue, { color: theme.text }]}>
+                    {selectedListing.sellerName} ({selectedListing.region})
                   </Text>
                 </View>
-                <View style={styles.sumRow}>
-                  <Text style={[styles.sumLabel, { color: theme.textSecondary }]}>Harga Satuan</Text>
-                  <Text style={[styles.sumVal, { color: theme.text }]}>{formatRupiah(selectedListing.pricePerKg)} / kg</Text>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Volume Minyak</Text>
+                  <Text style={[styles.summaryValue, { color: theme.text }]}>
+                    {selectedListing.volumeKg} kg (Jeriken Segel)
+                  </Text>
                 </View>
-                <View style={[styles.sumDivider, { backgroundColor: theme.border }]} />
-                <View style={styles.sumRow}>
-                  <Text style={[styles.sumLabel, { color: theme.text, fontWeight: '600' }]}>Total Nilai Escrow</Text>
-                  <Text style={[styles.sumTotal, { color: theme.text }]}>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Kadar Terverifikasi</Text>
+                  <Text style={[styles.summaryValue, { color: theme.accent }]}>
+                    PA {selectedListing.paPercentage}% (SNI Mutu Super)
+                  </Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabel, { color: theme.textSecondary }]}>Harga Satuan</Text>
+                  <Text style={[styles.summaryValue, { color: theme.text }]}>
+                    {formatRupiah(selectedListing.pricePerKg)} / kg
+                  </Text>
+                </View>
+
+                <View style={[styles.sheetDivider, { backgroundColor: theme.border }]} />
+
+                <View style={styles.summaryRow}>
+                  <Text style={[styles.summaryLabelBold, { color: theme.text }]}>Total Nilai Transaksi</Text>
+                  <Text style={[styles.summaryValHighlight, { color: theme.accent }]}>
                     {formatRupiah(selectedListing.volumeKg * selectedListing.pricePerKg)}
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.escrowNotice, { backgroundColor: theme.accentTint }]}>
+              {/* Escrow Guarantee Notice */}
+              <View style={[styles.guaranteeBox, { backgroundColor: theme.accentTint }]}>
                 <Lock size={16} color={theme.accent} strokeWidth={2.2} />
-                <Text style={[styles.escrowNoticeText, { color: theme.accent }]}>
-                  Dana diamankan di Rekening Bersama. Pencairan otomatis setelah uji mutu dan timbangan fisik diverifikasi di sentra hub.
+                <Text style={[styles.guaranteeText, { color: theme.accent }]}>
+                  Dana Anda disimpan di Rekening Escrow Terpercaya. Dana hanya akan diteruskan ke penjual setelah jeriken sampai dan hasil uji kadar PA% diverifikasi pembeli.
                 </Text>
               </View>
 
@@ -219,15 +238,21 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
                 activeOpacity={0.8}
                 onPress={handleOrderViaEscrow}
                 disabled={dealSuccess}
-                style={[styles.actionBtn, { backgroundColor: theme.accent }]}
+                style={[
+                  styles.confirmBtn,
+                  { backgroundColor: dealSuccess ? theme.accent : theme.accent },
+                ]}
               >
                 {dealSuccess ? (
                   <>
-                    <CheckCircle2 size={18} color="#FFFFFF" />
-                    <Text style={styles.actionBtnText}>Pesanan Escrow Dibuat</Text>
+                    <CheckCircle2 size={18} color="#FFFFFF" strokeWidth={2.4} />
+                    <Text style={styles.confirmBtnText}>Pesanan Escrow Dibuat!</Text>
                   </>
                 ) : (
-                  <Text style={styles.actionBtnText}>Kunci Dana di Rekening Bersama</Text>
+                  <>
+                    <Lock size={17} color="#FFFFFF" strokeWidth={2.4} />
+                    <Text style={styles.confirmBtnText}>Kunci Pesanan ke Vault Escrow</Text>
+                  </>
                 )}
               </TouchableOpacity>
             </View>
@@ -241,10 +266,10 @@ export const MarketplaceScreen: React.FC<MarketplaceScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 12,
   },
   titleSection: {
     paddingHorizontal: 16,
+    paddingTop: 12,
     marginBottom: 12,
   },
   largeTitle: {
@@ -257,41 +282,53 @@ const styles = StyleSheet.create({
     fontFamily: SANS_FONT,
     fontSize: 13,
     marginTop: 2,
+    lineHeight: 18,
   },
-  segmentedControl: {
+  filterContainer: {
     flexDirection: 'row',
-    borderRadius: 9,
-    padding: 2,
     marginHorizontal: 16,
-    marginBottom: 12,
+    borderRadius: 12,
+    padding: 3,
+    marginBottom: 10,
   },
-  segmentTab: {
+  filterTab: {
     flex: 1,
-    paddingVertical: 6,
+    paddingVertical: 7,
     alignItems: 'center',
-    borderRadius: 7,
+    borderRadius: 9,
   },
-  segmentActive: {
+  filterTabActive: {
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.08,
     shadowRadius: 2,
     elevation: 2,
   },
-  segmentLabel: {
+  filterLabel: {
     fontFamily: SANS_FONT,
     fontSize: 12,
   },
+  sectionHeading: {
+    fontFamily: SANS_FONT,
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
   listContainer: {
     paddingHorizontal: 16,
+    paddingBottom: 120,
   },
   listingCard: {
-    marginBottom: 14,
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 10,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 10,
   },
   sellerRow: {
     flexDirection: 'row',
@@ -301,19 +338,19 @@ const styles = StyleSheet.create({
   sellerName: {
     fontFamily: SANS_FONT,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   kycBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    borderRadius: 4,
+    gap: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
   },
   kycText: {
     fontFamily: SANS_FONT,
-    fontSize: 9,
+    fontSize: 10,
     fontWeight: '700',
   },
   regionText: {
@@ -322,9 +359,9 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   paBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   paText: {
     fontFamily: SANS_FONT,
@@ -333,10 +370,9 @@ const styles = StyleSheet.create({
   },
   specsTable: {
     flexDirection: 'row',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    marginBottom: 12,
+    borderRadius: 12,
+    paddingVertical: 9,
+    marginVertical: 10,
   },
   specCell: {
     flex: 1,
@@ -345,61 +381,61 @@ const styles = StyleSheet.create({
   specLabel: {
     fontFamily: SANS_FONT,
     fontSize: 10,
-    marginBottom: 2,
+    fontWeight: '500',
   },
   specVal: {
     fontFamily: SANS_FONT,
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 2,
   },
   specDivider: {
     width: StyleSheet.hairlineWidth,
-    height: 18,
+    marginVertical: 2,
   },
-  cardFooter: {
+  cardBottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  priceValue: {
+  priceTag: {
     fontFamily: SANS_FONT,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
   },
   priceUnit: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '400',
   },
-  totalBatchVal: {
+  totalTag: {
     fontFamily: SANS_FONT,
     fontSize: 11,
     marginTop: 1,
   },
-  buyBtn: {
+  orderBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 14,
+    gap: 6,
     paddingVertical: 8,
-    borderRadius: 8,
+    paddingHorizontal: 14,
+    borderRadius: 12,
   },
-  buyBtnText: {
+  orderBtnText: {
     fontFamily: SANS_FONT,
-    color: '#FFFFFF',
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
-  modalBackdrop: {
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'flex-end',
   },
-  modalCard: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderWidth: 1,
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 20,
-    paddingBottom: 36,
+    borderWidth: 1,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -418,66 +454,72 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   closeBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  summaryBox: {
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 14,
+  orderSummaryCard: {
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 12,
   },
-  sumRow: {
+  summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6,
+    paddingVertical: 5,
   },
-  sumLabel: {
+  summaryLabel: {
     fontFamily: SANS_FONT,
-    fontSize: 13,
+    fontSize: 12,
   },
-  sumVal: {
+  summaryValue: {
     fontFamily: SANS_FONT,
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
-  sumDivider: {
+  sheetDivider: {
     height: StyleSheet.hairlineWidth,
-    marginVertical: 6,
+    marginVertical: 8,
   },
-  sumTotal: {
+  summaryLabelBold: {
     fontFamily: SANS_FONT,
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
   },
-  escrowNotice: {
+  summaryValHighlight: {
+    fontFamily: SANS_FONT,
+    fontSize: 15,
+    fontWeight: '800',
+  },
+  guaranteeBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 8,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 16,
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 14,
   },
-  escrowNoticeText: {
+  guaranteeText: {
     flex: 1,
     fontFamily: SANS_FONT,
-    fontSize: 11,
-    lineHeight: 15,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '500',
   },
-  actionBtn: {
+  confirmBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
   },
-  actionBtnText: {
+  confirmBtnText: {
     fontFamily: SANS_FONT,
-    color: '#FFFFFF',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
-import { QrCode, Plus, CheckCircle2, X, Share2, Layers, Clock, MessageSquareShare } from 'lucide-react-native';
+import { QrCode, Plus, CheckCircle2, X, Share2, Layers, Clock, MessageSquareShare, Sparkles, Flame, ShieldCheck, Minus } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { DistillationBatch } from '../../data/mockData';
 import { formatKg, formatPercent, calculateRendemen } from '../../shared/utils/formatters';
@@ -24,9 +24,9 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
 
   // New batch form state
   const [showAddForm, setShowAddForm] = useState(false);
-  const [dryLeavesInput, setDryLeavesInput] = useState('400');
-  const [oilYieldInput, setOilYieldInput] = useState('13.2');
-  const [durationInput, setDurationInput] = useState('7');
+  const [dryLeavesInput, setDryLeavesInput] = useState('500');
+  const [oilYieldInput, setOilYieldInput] = useState('16.0');
+  const [durationInput, setDurationInput] = useState('7.5');
   const [boilerChoice, setBoilerChoice] = useState<'Stainless Steel Food Grade' | 'Drum Besi Galvanis'>('Stainless Steel Food Grade');
 
   // Load persistent batches on mount
@@ -36,8 +36,8 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
     });
   }, []);
 
-  const leavesNum = parseFloat(dryLeavesInput) || 0;
-  const oilNum = parseFloat(oilYieldInput) || 0;
+  const leavesNum = Math.max(1, parseFloat(dryLeavesInput) || 0);
+  const oilNum = Math.max(0, parseFloat(oilYieldInput) || 0);
   const computedRendemen = calculateRendemen(oilNum, leavesNum);
 
   const handleSaveBatch = async () => {
@@ -50,17 +50,17 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
       dryLeavesKg: leavesNum,
       oilYieldKg: oilNum,
       rendemen: parseFloat(computedRendemen.toFixed(2)),
-      durationHours: parseFloat(durationInput) || 7,
+      durationHours: parseFloat(durationInput) || 7.5,
       boilerType: boilerChoice,
       fuelType: 'Biomassa Limbah Nilam',
-      paPercentage: 33.4,
+      paPercentage: 33.6,
       labCertificateNo: `LAB-SNI-${Math.floor(1000 + Math.random() * 9000)}`,
       status: 'Tersedia',
     };
 
     const updated = [newBatch, ...batches];
     setBatches(updated);
-    await saveBatches(updated); // Persist to AsyncStorage!
+    await saveBatches(updated);
     setShowAddForm(false);
     setSelectedQRBatch(newBatch);
   };
@@ -72,34 +72,54 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
         <View style={{ flex: 1 }}>
           <Text style={[styles.largeTitle, { color: theme.text }]}>Batch Suling</Text>
           <Text style={[styles.titleCaption, { color: theme.textSecondary }]}>
-            Riwayat ketel dan penerbitan QR Passport mutu jeriken
+            Dokumentasi mutu ketel & paspor QR jeriken
           </Text>
         </View>
 
-        <View style={styles.topActionsRow}>
-          {/* Active Timer Trigger */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setShowTimerModal(true)}
-            style={[styles.timerIconBtn, { backgroundColor: theme.surfaceSecondary }]}
-          >
-            <Clock size={16} color={theme.text} strokeWidth={2} />
-          </TouchableOpacity>
-
-          {/* Plus Add Batch */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setShowAddForm(true)}
-            style={[styles.addBtn, { backgroundColor: theme.accent }]}
-          >
-            <Plus size={16} color="#FFFFFF" strokeWidth={2.2} />
-            <Text style={styles.addBtnText}>Tambah</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => setShowAddForm(true)}
+          style={[styles.addBtn, { backgroundColor: theme.accent }]}
+        >
+          <Plus size={16} color="#FFFFFF" strokeWidth={2.4} />
+          <Text style={styles.addBtnText}>Catat Batch</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Batch Inset Grouped Cards Feed */}
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.listContainer}>
+      {/* Active Boiler Stopwatch Prominent Banner */}
+      <View style={styles.timerBannerContainer}>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setShowTimerModal(true)}
+          style={[styles.timerBanner, { backgroundColor: theme.surface, borderColor: theme.border }]}
+        >
+          <View style={[styles.timerIconBox, { backgroundColor: theme.oilAmberTint }]}>
+            <Clock size={22} color={theme.oilAmber} strokeWidth={2.2} />
+          </View>
+          <View style={styles.timerTextContainer}>
+            <View style={styles.timerHeaderRow}>
+              <Text style={[styles.timerTitle, { color: theme.text }]}>Stopwatch Ketel Suling</Text>
+              <View style={[styles.timerLivePill, { backgroundColor: theme.accentTint }]}>
+                <View style={[styles.liveDot, { backgroundColor: theme.accent }]} />
+                <Text style={[styles.timerLiveText, { color: theme.accent }]}>Siap Suling</Text>
+              </View>
+            </View>
+            <Text style={[styles.timerSub, { color: theme.textSecondary }]}>
+              Pantau 3 fase penyulingan (6-8 jam) & checklist SOP SNI
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {/* Batch Feed */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContainer}
+      >
+        <Text style={[styles.sectionHeading, { color: theme.textSecondary }]}>
+          RIWAYAT BATCH TERDAFTAR ({batches.length})
+        </Text>
+
         {batches.map((batch) => (
           <BentoCard key={batch.id} mode={mode} style={styles.batchCard}>
             <View style={styles.batchHeader}>
@@ -110,15 +130,16 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
                 </Text>
               </View>
 
-              <View style={[styles.statusBadge, { backgroundColor: theme.accentTint }]}>
-                <Text style={[styles.statusText, { color: theme.accent }]}>{batch.status}</Text>
+              <View style={[styles.paBadge, { backgroundColor: theme.accentTint }]}>
+                <ShieldCheck size={12} color={theme.accent} strokeWidth={2.2} />
+                <Text style={[styles.paBadgeText, { color: theme.accent }]}>PA {batch.paPercentage}%</Text>
               </View>
             </View>
 
-            {/* Metrics Row */}
+            {/* Metrics Table */}
             <View style={[styles.metricsTable, { backgroundColor: theme.surfaceSecondary }]}>
               <View style={styles.metricCell}>
-                <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Daun Kering</Text>
+                <Text style={[styles.metricLabel, { color: theme.textSecondary }]}>Daun Suling</Text>
                 <Text style={[styles.metricVal, { color: theme.text }]}>{formatKg(batch.dryLeavesKg)}</Text>
               </View>
               <View style={[styles.metricDivider, { backgroundColor: theme.border }]} />
@@ -135,52 +156,45 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
 
             {/* Technical details & Action buttons */}
             <View style={styles.batchFooter}>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.techText, { color: theme.textSecondary }]}>
-                  {batch.boilerType} • {batch.durationHours} Jam Suling
-                </Text>
-                <Text style={[styles.paText, { color: theme.oilAmber }]}>
-                  PA {batch.paPercentage}% (Sertifikat {batch.labCertificateNo})
-                </Text>
-              </View>
+              <Text style={[styles.techText, { color: theme.textSecondary }]}>
+                {batch.boilerType} • {batch.durationHours} Jam Suling
+              </Text>
 
-              <View style={styles.footerBtns}>
+              <View style={styles.actionBtnsRow}>
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => shareBatchToWhatsApp(batch)}
-                  style={[styles.smallBtn, { backgroundColor: theme.surfaceSecondary }]}
+                  style={[styles.smallIconBtn, { backgroundColor: theme.surfaceSecondary }]}
                 >
-                  <MessageSquareShare size={14} color={theme.text} strokeWidth={2} />
+                  <MessageSquareShare size={15} color={theme.text} strokeWidth={2} />
+                  <Text style={[styles.btnLabel, { color: theme.text }]}>WA</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   activeOpacity={0.7}
                   onPress={() => setSelectedQRBatch(batch)}
-                  style={[styles.qrBtn, { backgroundColor: theme.surfaceSecondary }]}
+                  style={[styles.qrPassportBtn, { backgroundColor: theme.accent }]}
                 >
-                  <QrCode size={14} color={theme.text} strokeWidth={2} />
-                  <Text style={[styles.qrBtnText, { color: theme.text }]}>QR Passport</Text>
+                  <QrCode size={14} color="#FFFFFF" strokeWidth={2.2} />
+                  <Text style={styles.qrPassportBtnText}>Lihat QR Passport</Text>
                 </TouchableOpacity>
               </View>
             </View>
           </BentoCard>
         ))}
-        <View style={{ height: 32 }} />
       </ScrollView>
 
-      {/* Distillation Active Stopwatch / Timer Modal */}
-      <DistillationTimerModal
-        visible={showTimerModal}
-        onClose={() => setShowTimerModal(false)}
-        mode={mode}
-      />
-
-      {/* Add New Batch Form Modal */}
-      <Modal visible={showAddForm} transparent animationType="slide">
-        <View style={styles.modalBackdrop}>
-          <View style={[styles.modalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+      {/* Modal 1: Catat Batch Baru */}
+      <Modal visible={showAddForm} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalSheet, { backgroundColor: theme.surface, borderColor: theme.border }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: theme.text }]}>Catat Siklus Ketel Suling</Text>
+              <View>
+                <Text style={[styles.modalTitle, { color: theme.text }]}>Pencatatan Batch Suling</Text>
+                <Text style={[styles.modalSub, { color: theme.textSecondary }]}>
+                  Penerbitan nomor lot digital dan ketertelusuran SNI
+                </Text>
+              </View>
               <TouchableOpacity
                 onPress={() => setShowAddForm(false)}
                 style={[styles.closeBtn, { backgroundColor: theme.surfaceSecondary }]}
@@ -189,113 +203,136 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
               </TouchableOpacity>
             </View>
 
-            {/* Inset Form Fields */}
-            <View style={[styles.modalForm, { backgroundColor: theme.surfaceSecondary }]}>
-              <View style={styles.formRow}>
-                <Text style={[styles.fLabel, { color: theme.text }]}>Berat Daun Kering (kg)</Text>
-                <TextInput
-                  keyboardType="numeric"
-                  value={dryLeavesInput}
-                  onChangeText={setDryLeavesInput}
-                  style={[styles.fInput, { color: theme.text }]}
-                />
-              </View>
-
-              <View style={[styles.fDivider, { backgroundColor: theme.border }]} />
-
-              <View style={styles.formRow}>
-                <Text style={[styles.fLabel, { color: theme.text }]}>Minyak Tertampung (kg)</Text>
-                <TextInput
-                  keyboardType="numeric"
-                  value={oilYieldInput}
-                  onChangeText={setOilYieldInput}
-                  style={[styles.fInput, { color: theme.text }]}
-                />
-              </View>
-
-              <View style={[styles.fDivider, { backgroundColor: theme.border }]} />
-
-              <View style={styles.formRow}>
-                <Text style={[styles.fLabel, { color: theme.text }]}>Durasi Suling (Jam)</Text>
-                <TextInput
-                  keyboardType="numeric"
-                  value={durationInput}
-                  onChangeText={setDurationInput}
-                  style={[styles.fInput, { color: theme.text }]}
-                />
-              </View>
-            </View>
-
-            {/* Rendemen Preview Box */}
-            <View style={[styles.yieldPreviewBox, { backgroundColor: theme.accentTint }]}>
-              <Text style={[styles.yieldPreviewLabel, { color: theme.accent }]}>
-                Rendemen Terhitung Otomatis
-              </Text>
-              <Text style={[styles.yieldPreviewVal, { color: theme.accent }]}>
-                {computedRendemen.toFixed(2)}%
-              </Text>
-            </View>
-
-            {/* Boiler Choice Segmented Control */}
-            <Text style={[styles.boilerLabel, { color: theme.textSecondary }]}>TIPE KETEL SULING</Text>
-            <View style={[styles.segmentedControl, { backgroundColor: theme.surfaceSecondary }]}>
-              <TouchableOpacity
-                onPress={() => setBoilerChoice('Stainless Steel Food Grade')}
-                style={[
-                  styles.segmentTab,
-                  boilerChoice.includes('Stainless') && [styles.segmentActive, { backgroundColor: theme.surface }],
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    { color: boilerChoice.includes('Stainless') ? theme.text : theme.textSecondary },
-                  ]}
-                >
-                  Stainless 304/316
+            <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 420 }}>
+              {/* Form Input: Daun Kering */}
+              <View style={styles.formGroup}>
+                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
+                  Berat Daun Kering (kg)
                 </Text>
-              </TouchableOpacity>
+                <View style={[styles.inputContainer, { backgroundColor: theme.surfaceSecondary }]}>
+                  <TextInput
+                    value={dryLeavesInput}
+                    onChangeText={setDryLeavesInput}
+                    keyboardType="numeric"
+                    style={[styles.inputField, { color: theme.text }]}
+                  />
+                  <Text style={[styles.inputUnit, { color: theme.textSecondary }]}>kg</Text>
+                </View>
+              </View>
 
-              <TouchableOpacity
-                onPress={() => setBoilerChoice('Drum Besi Galvanis')}
-                style={[
-                  styles.segmentTab,
-                  boilerChoice.includes('Drum') && [styles.segmentActive, { backgroundColor: theme.surface }],
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    { color: boilerChoice.includes('Drum') ? theme.text : theme.textSecondary },
-                  ]}
-                >
-                  Drum Galvanis
+              {/* Form Input: Minyak */}
+              <View style={styles.formGroup}>
+                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
+                  Minyak Dihasilkan (kg)
                 </Text>
-              </TouchableOpacity>
-            </View>
+                <View style={[styles.inputContainer, { backgroundColor: theme.surfaceSecondary }]}>
+                  <TextInput
+                    value={oilYieldInput}
+                    onChangeText={setOilYieldInput}
+                    keyboardType="numeric"
+                    style={[styles.inputField, { color: theme.text }]}
+                  />
+                  <Text style={[styles.inputUnit, { color: theme.textSecondary }]}>kg</Text>
+                </View>
+              </View>
+
+              {/* Live Preview Rendemen Pill */}
+              <View style={[styles.previewRendemenBox, { backgroundColor: theme.accentTint }]}>
+                <Sparkles size={15} color={theme.accent} strokeWidth={2.2} />
+                <Text style={[styles.previewRendemenText, { color: theme.accent }]}>
+                  Estimasi Rendemen Batch: {computedRendemen.toFixed(2)}%
+                </Text>
+              </View>
+
+              {/* Durasi Suling */}
+              <View style={styles.formGroup}>
+                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>
+                  Lama Waktu Suling (Jam)
+                </Text>
+                <View style={[styles.inputContainer, { backgroundColor: theme.surfaceSecondary }]}>
+                  <TextInput
+                    value={durationInput}
+                    onChangeText={setDurationInput}
+                    keyboardType="numeric"
+                    style={[styles.inputField, { color: theme.text }]}
+                  />
+                  <Text style={[styles.inputUnit, { color: theme.textSecondary }]}>Jam</Text>
+                </View>
+              </View>
+
+              {/* Tipe Ketel */}
+              <View style={styles.formGroup}>
+                <Text style={[styles.inputLabel, { color: theme.textSecondary }]}>Jenis Ketel Suling</Text>
+                <View style={styles.boilerToggleRow}>
+                  <TouchableOpacity
+                    onPress={() => setBoilerChoice('Stainless Steel Food Grade')}
+                    style={[
+                      styles.boilerChoiceBtn,
+                      { backgroundColor: theme.surfaceSecondary },
+                      boilerChoice === 'Stainless Steel Food Grade' && {
+                        backgroundColor: theme.accentTint,
+                        borderColor: theme.accent,
+                        borderWidth: 1,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.boilerChoiceText,
+                        { color: boilerChoice === 'Stainless Steel Food Grade' ? theme.accent : theme.text },
+                      ]}
+                    >
+                      Stainless Steel 304
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={() => setBoilerChoice('Drum Besi Galvanis')}
+                    style={[
+                      styles.boilerChoiceBtn,
+                      { backgroundColor: theme.surfaceSecondary },
+                      boilerChoice === 'Drum Besi Galvanis' && {
+                        backgroundColor: theme.accentTint,
+                        borderColor: theme.accent,
+                        borderWidth: 1,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.boilerChoiceText,
+                        { color: boilerChoice === 'Drum Besi Galvanis' ? theme.accent : theme.text },
+                      ]}
+                    >
+                      Drum Besi
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </ScrollView>
 
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={handleSaveBatch}
-              style={[styles.actionBtn, { backgroundColor: theme.accent }]}
+              style={[styles.saveSubmitBtn, { backgroundColor: theme.accent }]}
             >
-              <CheckCircle2 size={16} color="#FFFFFF" strokeWidth={2.2} />
-              <Text style={styles.actionBtnText}>Simpan & Terbitkan QR Passport</Text>
+              <CheckCircle2 size={18} color="#FFFFFF" strokeWidth={2.2} />
+              <Text style={styles.saveSubmitText}>Simpan & Terbitkan QR Passport</Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
 
-      {/* QR Passport Viewer Modal */}
+      {/* Modal 2: QR Passport View */}
       {selectedQRBatch && (
-        <Modal visible={!!selectedQRBatch} transparent animationType="fade">
-          <View style={styles.modalBackdrop}>
-            <View style={[styles.qrModalCard, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+        <Modal visible={true} animationType="fade" transparent>
+          <View style={styles.modalOverlay}>
+            <View style={[styles.qrModalSheet, { backgroundColor: theme.surface }]}>
               <View style={styles.modalHeader}>
                 <View>
-                  <Text style={[styles.modalTitle, { color: theme.text }]}>Paspor Mutu Digital</Text>
+                  <Text style={[styles.modalTitle, { color: theme.text }]}>Digital QR Passport</Text>
                   <Text style={[styles.modalSub, { color: theme.textSecondary }]}>
-                    Standar Telusur SNI 06-2385
+                    Standar Ketertelusuran Mutu SNI 06-2385-2006
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -306,62 +343,62 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
                 </TouchableOpacity>
               </View>
 
-              {/* Clean Black and White QR Code Box */}
-              <View style={styles.qrCanvasBox}>
-                <QrCode size={130} color="#000000" strokeWidth={2} />
-                <Text style={styles.qrCodeLabel}>{selectedQRBatch.batchCode}</Text>
-                <Text style={styles.qrCodeHint}>
-                  Pindai untuk verifikasi integritas batch di laboratorium
+              {/* QR Representation */}
+              <View style={styles.qrCodeBox}>
+                <View style={styles.qrFrame}>
+                  <QrCode size={180} color="#000000" strokeWidth={1.8} />
+                </View>
+                <Text style={[styles.qrCodeNumber, { color: theme.text }]}>
+                  {selectedQRBatch.batchCode}
+                </Text>
+                <Text style={[styles.qrLabCert, { color: theme.textSecondary }]}>
+                  Sertifikat: {selectedQRBatch.labCertificateNo}
                 </Text>
               </View>
 
-              {/* Inset Specs Table */}
-              <View style={[styles.passportTable, { backgroundColor: theme.surfaceSecondary }]}>
-                <View style={styles.pRow}>
-                  <Text style={[styles.pLabel, { color: theme.textSecondary }]}>Kadar Patchouli Alcohol</Text>
-                  <Text style={[styles.pVal, { color: theme.accent, fontWeight: '700' }]}>
-                    {selectedQRBatch.paPercentage}% (SNI A)
+              <View style={[styles.qrSpecsCard, { backgroundColor: theme.surfaceSecondary }]}>
+                <View style={styles.specRow}>
+                  <Text style={[styles.specTitle, { color: theme.textSecondary }]}>Kadar Patchouli Alcohol</Text>
+                  <Text style={[styles.specValue, { color: theme.accent }]}>
+                    {selectedQRBatch.paPercentage}% (Super SNI)
                   </Text>
                 </View>
-                <View style={[styles.pDivider, { backgroundColor: theme.border }]} />
-                <View style={styles.pRow}>
-                  <Text style={[styles.pLabel, { color: theme.textSecondary }]}>Volume Bersih</Text>
-                  <Text style={[styles.pVal, { color: theme.text }]}>
-                    {formatKg(selectedQRBatch.oilYieldKg)}
+                <View style={styles.specRow}>
+                  <Text style={[styles.specTitle, { color: theme.textSecondary }]}>Kapasitas Daun</Text>
+                  <Text style={[styles.specValue, { color: theme.text }]}>
+                    {selectedQRBatch.dryLeavesKg} kg &rarr; {selectedQRBatch.oilYieldKg} kg Minyak
                   </Text>
                 </View>
-                <View style={[styles.pDivider, { backgroundColor: theme.border }]} />
-                <View style={styles.pRow}>
-                  <Text style={[styles.pLabel, { color: theme.textSecondary }]}>Rendemen Suling</Text>
-                  <Text style={[styles.pVal, { color: theme.text }]}>
-                    {formatPercent(selectedQRBatch.rendemen)}
+                <View style={styles.specRow}>
+                  <Text style={[styles.specTitle, { color: theme.textSecondary }]}>Jenis Ketel Suling</Text>
+                  <Text style={[styles.specValue, { color: theme.text }]}>
+                    {selectedQRBatch.boilerType}
                   </Text>
                 </View>
               </View>
 
-              <View style={styles.qrActionButtons}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => shareBatchToWhatsApp(selectedQRBatch)}
-                  style={[styles.waBtn, { backgroundColor: '#25D366' }]}
-                >
-                  <MessageSquareShare size={16} color="#FFFFFF" strokeWidth={2.2} />
-                  <Text style={styles.waBtnText}>Kirim ke WhatsApp</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  onPress={() => setSelectedQRBatch(null)}
-                  style={[styles.actionBtn, { backgroundColor: theme.accent, flex: 1 }]}
-                >
-                  <Share2 size={16} color="#FFFFFF" strokeWidth={2} />
-                  <Text style={styles.actionBtnText}>Cetak Label QR</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => {
+                  shareBatchToWhatsApp(selectedQRBatch);
+                  setSelectedQRBatch(null);
+                }}
+                style={[styles.saveSubmitBtn, { backgroundColor: theme.accent, marginTop: 14 }]}
+              >
+                <MessageSquareShare size={18} color="#FFFFFF" strokeWidth={2.2} />
+                <Text style={styles.saveSubmitText}>Kirim Paspor ke WhatsApp Pembeli</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
       )}
+
+      {/* Stopwatch Timer Full Modal */}
+      <DistillationTimerModal
+        visible={showTimerModal}
+        onClose={() => setShowTimerModal(false)}
+        mode={mode}
+      />
     </View>
   );
 };
@@ -369,14 +406,14 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 12,
   },
   titleSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    marginBottom: 14,
+    paddingTop: 12,
+    marginBottom: 10,
   },
   largeTitle: {
     fontFamily: SANS_FONT,
@@ -389,47 +426,101 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginTop: 2,
   },
-  topActionsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  timerIconBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderRadius: 14,
   },
   addBtnText: {
     fontFamily: SANS_FONT,
+    fontSize: 13,
+    fontWeight: '700',
     color: '#FFFFFF',
+  },
+  timerBannerContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 8,
+  },
+  timerBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  timerIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  timerTextContainer: {
+    flex: 1,
+  },
+  timerHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  timerTitle: {
+    fontFamily: SANS_FONT,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  timerLivePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  timerLiveText: {
+    fontFamily: SANS_FONT,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  timerSub: {
+    fontFamily: SANS_FONT,
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
+  },
+  sectionHeading: {
+    fontFamily: SANS_FONT,
     fontSize: 12,
     fontWeight: '600',
+    letterSpacing: 0.3,
+    marginBottom: 8,
+    marginLeft: 4,
   },
   listContainer: {
     paddingHorizontal: 16,
+    paddingBottom: 120, // Keep clean clearance above bottom nav bar
   },
   batchCard: {
-    marginBottom: 14,
+    padding: 14,
+    borderRadius: 16,
+    marginBottom: 10,
   },
   batchHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 10,
   },
   batchCode: {
     fontFamily: SANS_FONT,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
   },
   batchSub: {
@@ -437,22 +528,24 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
-  statusBadge: {
+  paBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  statusText: {
+  paBadgeText: {
     fontFamily: SANS_FONT,
     fontSize: 11,
     fontWeight: '700',
   },
   metricsTable: {
     flexDirection: 'row',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+    borderRadius: 12,
+    paddingVertical: 10,
+    marginVertical: 10,
   },
   metricCell: {
     flex: 1,
@@ -460,17 +553,18 @@ const styles = StyleSheet.create({
   },
   metricLabel: {
     fontFamily: SANS_FONT,
-    fontSize: 10,
-    marginBottom: 2,
+    fontSize: 11,
+    fontWeight: '500',
   },
   metricVal: {
     fontFamily: SANS_FONT,
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
+    marginTop: 2,
   },
   metricDivider: {
     width: StyleSheet.hairlineWidth,
-    height: 20,
+    marginVertical: 2,
   },
   batchFooter: {
     flexDirection: 'row',
@@ -478,57 +572,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   techText: {
+    flex: 1,
     fontFamily: SANS_FONT,
     fontSize: 11,
   },
-  paText: {
-    fontFamily: SANS_FONT,
-    fontSize: 11,
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  footerBtns: {
+  actionBtnsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
-  smallBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
+  smallIconBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 10,
   },
-  qrBtn: {
+  btnLabel: {
+    fontFamily: SANS_FONT,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  qrPassportBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
   },
-  qrBtnText: {
+  qrPassportBtnText: {
     fontFamily: SANS_FONT,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
+    color: '#FFFFFF',
   },
-  modalBackdrop: {
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.55)',
     justifyContent: 'flex-end',
   },
-  modalCard: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderWidth: 1,
+  modalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 20,
-    paddingBottom: 36,
+    borderWidth: 1,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   modalTitle: {
     fontFamily: SANS_FONT,
@@ -541,171 +636,129 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   closeBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  modalForm: {
-    borderRadius: 10,
-    overflow: 'hidden',
+  formGroup: {
     marginBottom: 12,
   },
-  formRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-  },
-  fLabel: {
+  inputLabel: {
     fontFamily: SANS_FONT,
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '600',
+    marginBottom: 6,
   },
-  fInput: {
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+  },
+  inputField: {
+    flex: 1,
     fontFamily: SANS_FONT,
     fontSize: 15,
     fontWeight: '600',
-    textAlign: 'right',
-    minWidth: 70,
-    padding: 0,
+    paddingVertical: 10,
   },
-  fDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginLeft: 12,
-  },
-  yieldPreviewBox: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  yieldPreviewLabel: {
+  inputUnit: {
     fontFamily: SANS_FONT,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '500',
   },
-  yieldPreviewVal: {
+  previewRendemenBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 12,
+  },
+  previewRendemenText: {
     fontFamily: SANS_FONT,
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
   },
-  boilerLabel: {
-    fontFamily: SANS_FONT,
-    fontSize: 11,
-    fontWeight: '600',
-    marginBottom: 6,
-    marginLeft: 2,
-  },
-  segmentedControl: {
+  boilerToggleRow: {
     flexDirection: 'row',
-    borderRadius: 8,
-    padding: 2,
-    marginBottom: 16,
+    gap: 8,
   },
-  segmentTab: {
+  boilerChoiceBtn: {
     flex: 1,
-    paddingVertical: 6,
+    paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: 10,
   },
-  segmentActive: {
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  segmentText: {
+  boilerChoiceText: {
     fontFamily: SANS_FONT,
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '600',
   },
-  actionBtn: {
+  saveSubmitBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    paddingVertical: 12,
-    borderRadius: 10,
+    paddingVertical: 14,
+    borderRadius: 14,
+    marginTop: 10,
   },
-  actionBtnText: {
+  saveSubmitText: {
     fontFamily: SANS_FONT,
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  qrModalCard: {
-    margin: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 20,
-    alignSelf: 'center',
-    width: '90%',
-  },
-  qrCanvasBox: {
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    marginBottom: 14,
-  },
-  qrCodeLabel: {
-    fontFamily: SANS_FONT,
-    color: '#000000',
     fontSize: 14,
     fontWeight: '700',
-    marginTop: 8,
+    color: '#FFFFFF',
   },
-  qrCodeHint: {
+  qrModalSheet: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+  },
+  qrCodeBox: {
+    alignItems: 'center',
+    marginVertical: 14,
+  },
+  qrFrame: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  qrCodeNumber: {
     fontFamily: SANS_FONT,
-    color: '#8E8E93',
-    fontSize: 11,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+    marginTop: 10,
+  },
+  qrLabCert: {
+    fontFamily: SANS_FONT,
+    fontSize: 12,
     marginTop: 2,
   },
-  passportTable: {
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 14,
+  qrSpecsCard: {
+    padding: 14,
+    borderRadius: 14,
   },
-  pRow: {
+  specRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 4,
+    paddingVertical: 5,
   },
-  pLabel: {
+  specTitle: {
     fontFamily: SANS_FONT,
     fontSize: 12,
   },
-  pVal: {
+  specValue: {
     fontFamily: SANS_FONT,
     fontSize: 12,
-    fontWeight: '600',
-  },
-  pDivider: {
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 4,
-  },
-  qrActionButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  waBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  waBtnText: {
-    fontFamily: SANS_FONT,
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

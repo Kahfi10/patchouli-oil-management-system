@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { AlertTriangle, CheckCircle2, ShieldAlert, Sparkles, ChevronRight, Stethoscope, Droplets } from 'lucide-react-native';
+import { AlertTriangle, CheckCircle2, ShieldAlert, Sparkles, ChevronRight, Stethoscope, Droplets, Info, Check, Flame } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { getAppleTheme, ThemeMode } from '../../shared/theme/colors';
 import { SANS_FONT } from '../../shared/theme/typography';
@@ -10,9 +10,10 @@ interface DiseaseCase {
   name: string;
   scientificName: string;
   status: 'OPTIMAL' | 'CRITICAL' | 'WARNING';
+  shortTag: string;
   visualSymptoms: string;
   yieldImpact: string;
-  solutionAction: string;
+  solutionAction: string[];
   preventionTip: string;
 }
 
@@ -20,21 +21,31 @@ const LEAF_CASES: DiseaseCase[] = [
   {
     id: 'healthy-wilted',
     name: 'Daun Cukup Layur (Siap Suling)',
-    scientificName: 'Tahap Pra-Destilasi Optimal',
+    scientificName: 'Fase Pra-Destilasi Optimal',
     status: 'OPTIMAL',
-    visualSymptoms: 'Daun lemas elastis, tidak mudah patah saat diremas, kadar air 12-15%, aroma khas nilam mulai tajam.',
-    yieldImpact: 'Rendemen Optimal: 3.2% - 3.6% (Kadar PA > 32%).',
-    solutionAction: 'Masukkan segera ke ketel suling. Tumpuk merata tanpa dipadatkan berlebihan agar uap panas menembus sempurna.',
-    preventionTip: 'Jemur di tempat teduh beraerasi baik selama 2-3 hari. Hindari sinar matahari terik langsung agar minyak atsiri tidak menguap di udara.',
+    shortTag: 'Siap Masuk Ketel',
+    visualSymptoms: 'Daun lemas elastis, tidak patah saat diremas, kadar air 12–15%, aroma khas nilam mulai tajam keluar.',
+    yieldImpact: 'Rendemen Tertinggi: 3.2% – 3.8% (Kadar Patchouli Alcohol > 32%).',
+    solutionAction: [
+      'Segera masukkan ke dalam ketel suling tanpa ditunda.',
+      'Tumpuk merata di atas angsang ketel tanpa dipadatkan berlebihan agar uap panas menembus sempurna.',
+      'Jaga api ketel stabil pada fase awal kondensasi.',
+    ],
+    preventionTip: 'Jemur di tempat teduh beraerasi baik selama 2–3 hari. Hindari sinar matahari terik langsung agar minyak atsiri tidak menguap bebas ke udara.',
   },
   {
     id: 'bacterial-wilt',
     name: 'Penyakit Layu Bakteri',
     scientificName: 'Ralstonia solanacearum',
     status: 'CRITICAL',
-    visualSymptoms: 'Tanaman layu mendadak dalam 1-2 hari tetapi daun tetap hijau (tidak menguning). Pembuluh kayu pada batang bawah berwarna cokelat gelap berlendir.',
-    yieldImpact: 'Kematian Tanaman 100%. Risiko menular ke seluruh petak kebun.',
-    solutionAction: 'Cabut dan musnahkan tanaman yang terinfeksi segera dengan dibakar di luar kebun. Taburkan kapur tohor (dolomit) pada lubang tanah bekas tanaman.',
+    shortTag: 'Bahaya Kebun',
+    visualSymptoms: 'Tanaman layu mendadak dalam 1–2 hari tetapi daun tetap berwarna hijau segar (tidak menguning). Pembuluh kayu pada pangkal batang berwarna cokelat gelap berlendir.',
+    yieldImpact: 'Kematian Tanaman 100%. Risiko menular cepat ke seluruh petak kebun melalui air tanah.',
+    solutionAction: [
+      'Cabut dan musnahkan tanaman yang terinfeksi segera dengan dibakar di luar kebun.',
+      'Taburkan kapur tohor (dolomit) sebanyak 100-200 gram pada lubang tanah bekas tanaman.',
+      'Jangan mengalirkan air parit dari petak yang sakit ke petak yang sehat.',
+    ],
     preventionTip: 'Gunakan bibit bersertifikat bebas bakteri. Aplikasikan agens hayati Trichoderma sp. atau Pseudomonas fluorescens sejak olah tanah.',
   },
   {
@@ -42,20 +53,30 @@ const LEAF_CASES: DiseaseCase[] = [
     name: 'Penyakit Budok / Mosaik',
     scientificName: 'Patchouli Mosaic Virus (Potyvirus)',
     status: 'WARNING',
-    visualSymptoms: 'Permukaan daun berkerut kasar, menebal, tepi daun menggulung ke atas, ruas daun memendek (tanaman kerdil).',
-    yieldImpact: 'Penurunan rendemen minyak hingga 50-70% (Kadar PA < 28%).',
-    solutionAction: 'Pangkas bagian tanaman yang berkerut dan isolasi dari tanaman lain. Kendalikan hama vektor (kutu daun/aphids).',
-    preventionTip: 'Sanitasi pisau/gunting pangkas dengan alkohol 70% sebelum berpindah tanaman. Jangan gunakan setek dari tanaman yang berkerut.',
+    shortTag: 'Menurunkan PA%',
+    visualSymptoms: 'Permukaan helai daun berkerut kasar, menebal, tepi daun menggulung ke atas, ruas daun memendek sehingga tanaman tampak kerdil.',
+    yieldImpact: 'Penurunan rendemen minyak hingga 50%–70% dan kadar PA anjlok di bawah 28%.',
+    solutionAction: [
+      'Pangkas bagian tanaman yang berkerut dan isolasi dari tanaman lain.',
+      'Kendalikan hama vektor penular (kutu daun/aphids) dengan insektisida nabati.',
+      'Beri pupuk daun tinggi kalium untuk memperkuat daya tahan jaringan.',
+    ],
+    preventionTip: 'Sterilisasi pisau/gunting pangkas dengan alkohol 70% sebelum berpindah tanaman. Hindari memperbanyak setek dari tanaman yang berkerut.',
   },
   {
     id: 'wet-fermentation',
-    name: 'Daun Terlalu Basah / Busuk Fermentasi',
+    name: 'Daun Terlalu Basah / Fermentasi',
     scientificName: 'Kadar Air Berlebih (> 25%)',
     status: 'WARNING',
-    visualSymptoms: 'Daun berlendir, lembek kehijauan gelap, aroma masam/apek busuk akibat ditumpuk saat masih basah air hujan.',
-    yieldImpact: 'Minyak suling berwarna hitam pekat, bau asam tajam, sulit dipisahkan dari air suling di dekanter.',
-    solutionAction: 'Bongkar tumpukan daun segera. Anginkan di atas terpal beratap dengan sirkulasi udara kencang hingga kadar air turun ke 14%.',
-    preventionTip: 'Jangan pernah memanen daun nilam saat hujan lebat. Pastikan daun bebas dari embun pagi sebelum proses perajangan.',
+    shortTag: 'Minyak Hitam',
+    visualSymptoms: 'Daun berlendir, lembek kehijauan gelap, aroma masam atau apek busuk akibat ditumpuk tebal saat masih basah air hujan.',
+    yieldImpact: 'Minyak suling berwarna gelap/kehitaman, berbau asam tajam, dan sulit memisah dari air di dekanter.',
+    solutionAction: [
+      'Bongkar tumpukan daun segera dan tebarkan tipis-tipis.',
+      'Anginkan di atas terpal beratap dengan sirkulasi udara kencang hingga kadar air turun ke 14%.',
+      'Jangan dicampur dengan daun kering yang sudah siap suling.',
+    ],
+    preventionTip: 'Hindari memanen daun nilam saat hujan lebat. Pastikan daun bebas dari embun pagi sebelum proses perajangan.',
   },
 ];
 
@@ -68,8 +89,15 @@ export const LeafDiagnosticScreen: React.FC<LeafDiagnosticScreenProps> = ({ mode
   const theme = getAppleTheme(mode);
   const [selectedCase, setSelectedCase] = useState<DiseaseCase>(LEAF_CASES[0]);
 
+  const isOptimal = selectedCase.status === 'OPTIMAL';
+  const isCritical = selectedCase.status === 'CRITICAL';
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.canvas }]} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.canvas }]}
+      contentContainerStyle={styles.contentContainer}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Back button if opened from home */}
       {onBack && (
         <TouchableOpacity
@@ -85,105 +113,97 @@ export const LeafDiagnosticScreen: React.FC<LeafDiagnosticScreenProps> = ({ mode
       <View style={styles.titleSection}>
         <Text style={[styles.largeTitle, { color: theme.text }]}>Diagnosa Daun Nilam</Text>
         <Text style={[styles.titleCaption, { color: theme.textSecondary }]}>
-          Panduan inspeksi kesehatan daun dan kesiapan ketel suling
+          Panduan inspeksi visual patologi tanaman dan mutu bahan baku suling
         </Text>
       </View>
 
-      {/* Selector Cards (Inset Grouped) */}
-      <Text style={[styles.sectionHeading, { color: theme.textSecondary }]}>PILIH GEJALA TANAMAN</Text>
-      <View style={[styles.groupedList, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-        {LEAF_CASES.map((item, idx) => {
+      {/* Quick Interactive Symptom Triage Buttons */}
+      <Text style={[styles.sectionHeading, { color: theme.textSecondary }]}>
+        PILIH KONDISI / GEJALA FISIK DAUN
+      </Text>
+      <View style={styles.triageGrid}>
+        {LEAF_CASES.map((item) => {
           const isSelected = selectedCase.id === item.id;
-          const isOptimal = item.status === 'OPTIMAL';
-          const isCritical = item.status === 'CRITICAL';
+          const statusColor =
+            item.status === 'OPTIMAL'
+              ? theme.accent
+              : item.status === 'CRITICAL'
+              ? theme.danger
+              : theme.oilAmber;
 
           return (
             <TouchableOpacity
               key={item.id}
-              activeOpacity={0.7}
+              activeOpacity={0.75}
               onPress={() => setSelectedCase(item)}
               style={[
-                styles.listItem,
-                { borderBottomColor: theme.border },
-                idx === LEAF_CASES.length - 1 && { borderBottomWidth: 0 },
-                isSelected && { backgroundColor: theme.surfaceSecondary },
+                styles.triageBtn,
+                { backgroundColor: theme.surface, borderColor: theme.border },
+                isSelected && {
+                  borderColor: statusColor,
+                  borderWidth: 2,
+                  backgroundColor: theme.surfaceSecondary,
+                },
               ]}
             >
-              <View
+              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+              <Text
                 style={[
-                  styles.statusIndicator,
-                  {
-                    backgroundColor: isOptimal
-                      ? theme.accent
-                      : isCritical
-                      ? theme.danger
-                      : theme.oilAmber,
-                  },
+                  styles.triageBtnText,
+                  { color: theme.text },
+                  isSelected && { fontWeight: '700' },
                 ]}
-              />
-
-              <View style={styles.listTextContainer}>
-                <Text
-                  style={[
-                    styles.itemTitle,
-                    { color: theme.text },
-                    isSelected && { fontWeight: '700' },
-                  ]}
-                >
-                  {item.name}
-                </Text>
-                <Text style={[styles.itemSub, { color: theme.textSecondary }]}>
-                  {item.scientificName}
-                </Text>
-              </View>
-
-              <ChevronRight
-                size={16}
-                color={isSelected ? theme.accent : theme.textTertiary}
-                strokeWidth={2}
-              />
+                numberOfLines={1}
+              >
+                {item.name.split(' ')[0]} {item.name.split(' ')[1] || ''}
+              </Text>
+              <Text style={[styles.triageBtnSub, { color: statusColor }]}>
+                {item.shortTag}
+              </Text>
             </TouchableOpacity>
           );
         })}
       </View>
 
-      {/* Selected Diagnostic Detail Bento Card */}
-      <Text style={[styles.sectionHeading, { color: theme.textSecondary, marginTop: 18 }]}>
-        HASIL ANALISA & PANDUAN PENANGANAN
-      </Text>
-
+      {/* Detailed Diagnosis Card */}
       <BentoCard mode={mode} style={styles.detailCard}>
-        <View style={styles.detailHeader}>
-          <View>
-            <Text style={[styles.detailTitle, { color: theme.text }]}>{selectedCase.name}</Text>
-            <Text style={[styles.detailScientific, { color: theme.textSecondary }]}>
+        {/* Header with Case Title and Status Pill */}
+        <View style={styles.cardHeader}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.caseName, { color: theme.text }]}>{selectedCase.name}</Text>
+            <Text style={[styles.caseScientific, { color: theme.textSecondary }]}>
               {selectedCase.scientificName}
             </Text>
           </View>
 
           <View
             style={[
-              styles.statusChip,
+              styles.statusBadge,
               {
-                backgroundColor:
-                  selectedCase.status === 'OPTIMAL'
-                    ? theme.accentTint
-                    : selectedCase.status === 'CRITICAL'
-                    ? theme.dangerTint
-                    : theme.oilAmberTint,
+                backgroundColor: isOptimal
+                  ? theme.accentTint
+                  : isCritical
+                  ? theme.dangerTint
+                  : theme.oilAmberTint,
               },
             ]}
           >
+            {isOptimal ? (
+              <CheckCircle2 size={13} color={theme.accent} strokeWidth={2.5} />
+            ) : isCritical ? (
+              <AlertTriangle size={13} color={theme.danger} strokeWidth={2.5} />
+            ) : (
+              <ShieldAlert size={13} color={theme.oilAmber} strokeWidth={2.5} />
+            )}
             <Text
               style={[
-                styles.statusChipText,
+                styles.statusBadgeText,
                 {
-                  color:
-                    selectedCase.status === 'OPTIMAL'
-                      ? theme.accent
-                      : selectedCase.status === 'CRITICAL'
-                      ? theme.danger
-                      : theme.oilAmber,
+                  color: isOptimal
+                    ? theme.accent
+                    : isCritical
+                    ? theme.danger
+                    : theme.oilAmber,
                 },
               ]}
             >
@@ -192,48 +212,61 @@ export const LeafDiagnosticScreen: React.FC<LeafDiagnosticScreenProps> = ({ mode
           </View>
         </View>
 
-        <View style={[styles.divider, { backgroundColor: theme.border }]} />
+        <View style={[styles.cardDivider, { backgroundColor: theme.border }]} />
 
-        {/* Ciri Visual */}
-        <View style={styles.specSection}>
-          <Text style={[styles.specHeading, { color: theme.textSecondary }]}>CIRI VISUAL:</Text>
-          <Text style={[styles.specBody, { color: theme.text }]}>
+        {/* Gejala Visual */}
+        <View style={styles.infoSection}>
+          <Text style={[styles.infoHeading, { color: theme.textSecondary }]}>
+            GEJALA VISUAL PADA TANAMAN
+          </Text>
+          <Text style={[styles.infoBody, { color: theme.text }]}>
             {selectedCase.visualSymptoms}
           </Text>
         </View>
 
         {/* Dampak Rendemen */}
-        <View style={[styles.noticeBox, { backgroundColor: theme.surfaceSecondary }]}>
-          <Droplets size={16} color={theme.oilAmber} strokeWidth={2} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.noticeTitle, { color: theme.text }]}>Dampak Terhadap Minyak:</Text>
-            <Text style={[styles.noticeText, { color: theme.textSecondary }]}>
-              {selectedCase.yieldImpact}
-            </Text>
-          </View>
-        </View>
-
-        {/* Solusi Operasional Lapangan */}
-        <View style={[styles.actionBox, { backgroundColor: theme.accentTint }]}>
-          <CheckCircle2 size={16} color={theme.accent} strokeWidth={2.2} />
-          <View style={{ flex: 1 }}>
-            <Text style={[styles.actionTitle, { color: theme.accent }]}>Tindakan Petani:</Text>
-            <Text style={[styles.actionText, { color: theme.accent }]}>
-              {selectedCase.solutionAction}
-            </Text>
-          </View>
-        </View>
-
-        {/* Tips Pencegahan */}
-        <View style={styles.preventionBox}>
-          <Text style={[styles.prevHeading, { color: theme.textSecondary }]}>SOP Pencegahan:</Text>
-          <Text style={[styles.prevText, { color: theme.textSecondary }]}>
-            {selectedCase.preventionTip}
+        <View style={[styles.yieldBox, { backgroundColor: theme.surfaceSecondary }]}>
+          <Text style={[styles.yieldHeading, { color: theme.textSecondary }]}>
+            Dampak Terhadap Rendemen & Mutu:
+          </Text>
+          <Text
+            style={[
+              styles.yieldVal,
+              { color: isOptimal ? theme.accent : isCritical ? theme.danger : theme.oilAmber },
+            ]}
+          >
+            {selectedCase.yieldImpact}
           </Text>
         </View>
-      </BentoCard>
 
-      <View style={{ height: 36 }} />
+        {/* Langkah Solusi Praktis */}
+        <View style={styles.infoSection}>
+          <Text style={[styles.infoHeading, { color: theme.textSecondary, marginBottom: 8 }]}>
+            TINDAKAN SEGERA (SOP PENANGANAN)
+          </Text>
+          {selectedCase.solutionAction.map((step, idx) => (
+            <View key={idx} style={styles.stepRow}>
+              <View style={[styles.stepNumberCircle, { backgroundColor: theme.accentTint }]}>
+                <Text style={[styles.stepNumberText, { color: theme.accent }]}>{idx + 1}</Text>
+              </View>
+              <Text style={[styles.stepText, { color: theme.text }]}>{step}</Text>
+            </View>
+          ))}
+        </View>
+
+        {/* Tips Pencegahan Kebun */}
+        <View style={[styles.preventionBox, { backgroundColor: theme.accentTint }]}>
+          <Sparkles size={16} color={theme.accent} strokeWidth={2.2} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.preventionTitle, { color: theme.accent }]}>
+              Tips Budidaya Kebun Berkelanjutan
+            </Text>
+            <Text style={[styles.preventionBody, { color: theme.accent }]}>
+              {selectedCase.preventionTip}
+            </Text>
+          </View>
+        </View>
+      </BentoCard>
     </ScrollView>
   );
 };
@@ -241,20 +274,23 @@ export const LeafDiagnosticScreen: React.FC<LeafDiagnosticScreenProps> = ({ mode
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentContainer: {
     paddingHorizontal: 16,
     paddingTop: 12,
+    paddingBottom: 120,
   },
   backNavBtn: {
     paddingVertical: 6,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   backNavText: {
     fontFamily: SANS_FONT,
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
   },
   titleSection: {
-    marginBottom: 12,
+    marginBottom: 14,
   },
   largeTitle: {
     fontFamily: SANS_FONT,
@@ -266,147 +302,157 @@ const styles = StyleSheet.create({
     fontFamily: SANS_FONT,
     fontSize: 13,
     marginTop: 2,
+    lineHeight: 18,
   },
   sectionHeading: {
     fontFamily: SANS_FONT,
     fontSize: 12,
     fontWeight: '600',
-    letterSpacing: 0.2,
+    letterSpacing: 0.3,
     marginBottom: 8,
     marginLeft: 4,
   },
-  groupedList: {
+  triageGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 14,
+  },
+  triageBtn: {
+    flex: 1,
+    minWidth: '47%',
+    padding: 10,
     borderRadius: 14,
     borderWidth: 1,
-    overflow: 'hidden',
   },
-  listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginBottom: 4,
   },
-  statusIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 12,
-  },
-  listTextContainer: {
-    flex: 1,
-  },
-  itemTitle: {
+  triageBtnText: {
     fontFamily: SANS_FONT,
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: 13,
+    fontWeight: '600',
   },
-  itemSub: {
+  triageBtnSub: {
     fontFamily: SANS_FONT,
-    fontSize: 12,
-    marginTop: 1,
+    fontSize: 10,
+    fontWeight: '600',
+    marginTop: 2,
   },
   detailCard: {
-    marginBottom: 16,
+    padding: 16,
+    borderRadius: 18,
   },
-  detailHeader: {
+  cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  detailTitle: {
+  caseName: {
     fontFamily: SANS_FONT,
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '700',
   },
-  detailScientific: {
+  caseScientific: {
     fontFamily: SANS_FONT,
     fontSize: 12,
     fontStyle: 'italic',
     marginTop: 2,
   },
-  statusChip: {
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
-  statusChipText: {
+  statusBadgeText: {
     fontFamily: SANS_FONT,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
   },
-  divider: {
+  cardDivider: {
     height: StyleSheet.hairlineWidth,
-    marginVertical: 12,
+    marginVertical: 14,
   },
-  specSection: {
-    marginBottom: 12,
+  infoSection: {
+    marginBottom: 14,
   },
-  specHeading: {
+  infoHeading: {
     fontFamily: SANS_FONT,
     fontSize: 11,
     fontWeight: '600',
+    letterSpacing: 0.3,
     marginBottom: 4,
   },
-  specBody: {
+  infoBody: {
+    fontFamily: SANS_FONT,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  yieldBox: {
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 14,
+  },
+  yieldHeading: {
+    fontFamily: SANS_FONT,
+    fontSize: 11,
+    fontWeight: '500',
+  },
+  yieldVal: {
+    fontFamily: SANS_FONT,
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 3,
+    lineHeight: 18,
+  },
+  stepRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 8,
+  },
+  stepNumberCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 1,
+  },
+  stepNumberText: {
+    fontFamily: SANS_FONT,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  stepText: {
+    flex: 1,
     fontFamily: SANS_FONT,
     fontSize: 13,
     lineHeight: 18,
   },
-  noticeBox: {
+  preventionBox: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
+    padding: 12,
+    borderRadius: 14,
   },
-  noticeTitle: {
-    fontFamily: SANS_FONT,
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  noticeText: {
-    fontFamily: SANS_FONT,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  actionBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 10,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  actionTitle: {
+  preventionTitle: {
     fontFamily: SANS_FONT,
     fontSize: 12,
     fontWeight: '700',
     marginBottom: 2,
   },
-  actionText: {
+  preventionBody: {
     fontFamily: SANS_FONT,
     fontSize: 12,
-    lineHeight: 16,
+    lineHeight: 17,
     fontWeight: '500',
-  },
-  preventionBox: {
-    marginTop: 4,
-    paddingTop: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(0,0,0,0.06)',
-  },
-  prevHeading: {
-    fontFamily: SANS_FONT,
-    fontSize: 11,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  prevText: {
-    fontFamily: SANS_FONT,
-    fontSize: 12,
-    lineHeight: 16,
   },
 });
