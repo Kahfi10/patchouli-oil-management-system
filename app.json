@@ -1,15 +1,17 @@
 {
   "expo": {
-    "name": "capstone",
-    "slug": "capstone",
+    "name": "NilamHub",
+    "slug": "patchouli-oil-management-system",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kahfi10.nilamhub"
     },
     "android": {
+      "package": "com.kahfi10.nilamhub",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -20,6 +22,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0065ddf6-9595-4cd7-bb47-61c39a7ccbe1"
+      }
+    },
+    "owner": "kahfiii"
   }
 }
