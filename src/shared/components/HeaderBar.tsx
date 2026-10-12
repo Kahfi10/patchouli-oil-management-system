@@ -8,6 +8,7 @@ interface HeaderBarProps {
   mode: ThemeMode;
   onToggleMode: () => void;
   onOpenEntrance?: () => void;
+  onOpenNotifications?: () => void;
   activeNotificationsCount?: number;
 }
 
@@ -15,6 +16,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   mode,
   onToggleMode,
   onOpenEntrance,
+  onOpenNotifications,
   activeNotificationsCount = 2,
 }) => {
   const theme = getAppleTheme(mode);
@@ -61,6 +63,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 
         <TouchableOpacity
           activeOpacity={0.65}
+          onPress={onOpenNotifications}
           style={[styles.iconButton, { backgroundColor: theme.surfaceSecondary }]}
         >
           <Bell size={17} color={theme.text} strokeWidth={2} />

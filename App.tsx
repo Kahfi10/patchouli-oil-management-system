@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, SafeAreaView, StatusBar, Platform } from 'react-native';
 import { HeaderBar } from './src/shared/components/HeaderBar';
 import { BottomNav, TabId } from './src/shared/components/BottomNav';
@@ -9,6 +9,9 @@ import { DistillationBatchScreen } from './src/features/distillation-batch/Disti
 import { EscrowOrdersScreen } from './src/features/escrow-orders/EscrowOrdersScreen';
 import { LeafDiagnosticScreen } from './src/features/leaf-diagnostic/LeafDiagnosticScreen';
 import { AppEntranceScreen } from './src/features/onboarding/AppEntranceScreen';
+import { NotificationsModal } from './src/shared/components/NotificationsModal';
+import { MOCK_NOTIFICATIONS, AppNotification } from './src/data/mockData';
+import { loadSavedNotifications, saveNotifications } from './src/shared/utils/storage';
 import { getAppleTheme, ThemeMode } from './src/shared/theme/colors';
 
 export default function App() {
@@ -16,11 +19,36 @@ export default function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>('light');
   const [activeTab, setActiveTab] = useState<TabId>('beranda');
   const [showEntrance, setShowEntrance] = useState<boolean>(true);
+  const [showNotifications, setShowNotifications] = useState<boolean>(false);
+  const [notifications, setNotifications] = useState<AppNotification[]>(MOCK_NOTIFICATIONS);
 
   const theme = getAppleTheme(themeMode);
 
+  // Load offline persisted notifications
+  useEffect(() => {
+    loadSavedNotifications().then((saved) => {
+      if (saved && saved.length > 0) {
+        setNotifications(saved);
+      }
+    });
+  }, []);
+
   const toggleThemeMode = () => {
     setThemeMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  const handleMarkAllAsRead = async () => {
+    const updated = notifications.map((n) => ({ ...n, isRead: true }));
+    setNotifications(updated);
+    await saveNotifications(updated);
+  };
+
+  const handleSelectNotification = async (item: AppNotification) => {
+    const updated = notifications.map((n) => (n.id === item.id ? { ...n, isRead: true } : n));
+    setNotifications(updated);
+    await saveNotifications(updated);
   };
 
   const renderActiveScreen = () => {
@@ -73,7 +101,8 @@ export default function App() {
             mode={themeMode}
             onToggleMode={toggleThemeMode}
             onOpenEntrance={() => setShowEntrance(true)}
-            activeNotificationsCount={2}
+            onOpenNotifications={() => setShowNotifications(true)}
+            activeNotificationsCount={unreadCount}
           />
 
           {/* Content Body */}
@@ -84,6 +113,17 @@ export default function App() {
             activeTab={activeTab}
             onChangeTab={setActiveTab}
             mode={themeMode}
+          />
+
+          {/* Interactive Notifications Modal */}
+          <NotificationsModal
+            visible={showNotifications}
+            onClose={() => setShowNotifications(false)}
+            mode={themeMode}
+            notifications={notifications}
+            onMarkAllAsRead={handleMarkAllAsRead}
+            onSelectNotification={handleSelectNotification}
+            onNavigateTab={(tab) => setActiveTab(tab)}
           />
         </View>
       )}

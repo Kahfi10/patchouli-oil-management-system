@@ -62,3 +62,29 @@ export const saveCalculatorHistory = async (items: CalculatorHistoryItem[]): Pro
     console.error('Failed to save calc history', error);
   }
 };
+
+const NOTIFICATIONS_STORAGE_KEY = '@sulingtrace_notifications';
+
+export const loadSavedNotifications = async (): Promise<any[]> => {
+  try {
+    const raw = await AsyncStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+    return [];
+  } catch {
+    return [];
+  }
+};
+
+export const saveNotifications = async (items: any[]): Promise<void> => {
+  try {
+    await AsyncStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(items));
+  } catch (error) {
+    console.error('Failed to save notifications', error);
+  }
+};
+

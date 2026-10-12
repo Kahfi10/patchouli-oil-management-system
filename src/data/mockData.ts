@@ -241,3 +241,52 @@ export const MOCK_ESCROW_ORDERS: EscrowOrder[] = [
     paTested: 33.6,
   },
 ];
+
+export interface AppNotification {
+  id: string;
+  category: 'ketel' | 'pasar' | 'escrow' | 'sistem';
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  actionTab?: 'beranda' | 'kalkulator' | 'marketplace' | 'ketel' | 'escrow' | 'diagnosa';
+}
+
+export const MOCK_NOTIFICATIONS: AppNotification[] = [
+  {
+    id: 'notif-1',
+    category: 'ketel',
+    title: 'Peringatan Fase Ketel Suling',
+    message: 'Batch NLM-SUL-402 memasuki Jam ke-4 (Fase Puncak). Pertahankan suhu air kondensor 45–50°C agar fraksi Patchouli Alcohol terekstraksi maksimal.',
+    timestamp: '10 Menit Lalu',
+    isRead: false,
+    actionTab: 'ketel',
+  },
+  {
+    id: 'notif-2',
+    category: 'pasar',
+    title: 'Harga Spot Aceh Naik +2.8%',
+    message: 'Harga acuan minyak nilam Aceh Barat naik menjadi Rp 1.420.000/kg didorong lonjakan permintaan industri parfum Eropa.',
+    timestamp: '1 Jam Lalu',
+    isRead: false,
+    actionTab: 'beranda',
+  },
+  {
+    id: 'notif-3',
+    category: 'escrow',
+    title: 'Dana Escrow Diamankan',
+    message: 'Pembeli PT Aroma Atsiri Nusantara telah mendepositkan Rp 41.400.000 ke rekening escrow untuk pesanan ESC-NLM-9941.',
+    timestamp: '3 Jam Lalu',
+    isRead: true,
+    actionTab: 'escrow',
+  },
+  {
+    id: 'notif-4',
+    category: 'sistem',
+    title: 'Verifikasi Mutu SNI Terbit',
+    message: 'Sertifikat uji lab batch NLM-SUL-108 terverifikasi dengan kadar PA 33.6% (Standar Ekspor Super). Paspor QR siap dibagikan ke pembeli.',
+    timestamp: 'Kemarin',
+    isRead: true,
+    actionTab: 'ketel',
+  },
+];
