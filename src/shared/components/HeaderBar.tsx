@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Bell, Sun, Moon, ShieldCheck, HelpCircle } from 'lucide-react-native';
 import { getAppleTheme, ThemeMode } from '../theme/colors';
 import { SANS_FONT } from '../theme/typography';
@@ -26,6 +26,11 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       {/* Brand & Subtitle - Clean Apple Typography */}
       <View style={styles.brandContainer}>
         <View style={styles.titleRow}>
+          <Image
+            source={require('../../../assets/logo.png')}
+            style={{ width: 24, height: 24, borderRadius: 6, marginRight: 2 }}
+            resizeMode="contain"
+          />
           <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>
           <View style={[styles.verifiedBadge, { backgroundColor: theme.accentTint }]}>
             <ShieldCheck size={11} color={theme.accent} strokeWidth={2.2} />

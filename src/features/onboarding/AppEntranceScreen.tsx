@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Image } from 'react-native';
 import { ShieldCheck, TrendingUp, Calculator, QrCode, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react-native';
 import { getAppleTheme, ThemeMode } from '../../shared/theme/colors';
 import { SANS_FONT } from '../../shared/theme/typography';
@@ -64,8 +64,12 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
       <Animated.View style={[styles.contentWrapper, { opacity: fadeAnim }]}>
         {/* Brand Emblem */}
         <View style={styles.emblemContainer}>
-          <View style={[styles.emblemIconBox, { backgroundColor: theme.accentTint, borderColor: theme.border }]}>
-            <Sparkles size={38} color={theme.accent} strokeWidth={2.2} />
+          <View style={[styles.emblemIconBox, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+            <Image
+              source={require('../../../assets/logo.png')}
+              style={{ width: 62, height: 62, borderRadius: 14 }}
+              resizeMode="contain"
+            />
           </View>
           <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>
           <Text style={[styles.brandSubtitle, { color: theme.textSecondary }]}>
