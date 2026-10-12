@@ -27,8 +27,8 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       <View style={styles.brandContainer}>
         <View style={styles.titleRow}>
           <Image
-            source={require('../../../assets/logo.png')}
-            style={{ width: 24, height: 24, borderRadius: 6, marginRight: 2 }}
+            source={require('../../../assets/logo_emblem.png')}
+            style={{ width: 24, height: 24, marginRight: 4 }}
             resizeMode="contain"
           />
           <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>

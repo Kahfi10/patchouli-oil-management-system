@@ -10,6 +10,7 @@ import { EscrowOrdersScreen } from './src/features/escrow-orders/EscrowOrdersScr
 import { LeafDiagnosticScreen } from './src/features/leaf-diagnostic/LeafDiagnosticScreen';
 import { AppEntranceScreen } from './src/features/onboarding/AppEntranceScreen';
 import { NotificationsModal } from './src/shared/components/NotificationsModal';
+import { PageTransitionLoader } from './src/shared/components/PageTransitionLoader';
 import { MOCK_NOTIFICATIONS, AppNotification } from './src/data/mockData';
 import { loadSavedNotifications, saveNotifications } from './src/shared/utils/storage';
 import { getAppleTheme, ThemeMode } from './src/shared/theme/colors';
@@ -21,6 +22,10 @@ export default function App() {
   const [showEntrance, setShowEntrance] = useState<boolean>(true);
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AppNotification[]>(MOCK_NOTIFICATIONS);
+
+  // Smooth page transition state with textless logo emblem
+  const [isPageTransitioning, setIsPageTransitioning] = useState<boolean>(false);
+  const [transitionTargetTab, setTransitionTargetTab] = useState<TabId>('beranda');
 
   const theme = getAppleTheme(themeMode);
 
@@ -35,6 +40,13 @@ export default function App() {
 
   const toggleThemeMode = () => {
     setThemeMode((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const handleSwitchTab = (newTab: TabId) => {
+    if (newTab === activeTab) return;
+    setTransitionTargetTab(newTab);
+    setIsPageTransitioning(true);
+    setActiveTab(newTab);
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -57,7 +69,7 @@ export default function App() {
         return (
           <MarketTickerScreen
             mode={themeMode}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            onNavigateTab={(tab) => handleSwitchTab(tab)}
           />
         );
       case 'kalkulator':
@@ -66,7 +78,7 @@ export default function App() {
         return (
           <MarketplaceScreen
             mode={themeMode}
-            onNavigateToEscrow={() => setActiveTab('escrow')}
+            onNavigateToEscrow={() => handleSwitchTab('escrow')}
           />
         );
       case 'ketel':
@@ -74,7 +86,7 @@ export default function App() {
       case 'escrow':
         return <EscrowOrdersScreen mode={themeMode} />;
       case 'diagnosa':
-        return <LeafDiagnosticScreen mode={themeMode} onBack={() => setActiveTab('beranda')} />;
+        return <LeafDiagnosticScreen mode={themeMode} onBack={() => handleSwitchTab('beranda')} />;
       default:
         return null;
     }
@@ -111,9 +123,18 @@ export default function App() {
           {/* Bottom Apple Style Tab Bar */}
           <BottomNav
             activeTab={activeTab}
-            onChangeTab={setActiveTab}
+            onChangeTab={handleSwitchTab}
             mode={themeMode}
           />
+
+          {/* Micro Page Transition Loader with Textless Logo Emblem */}
+          {isPageTransitioning && (
+            <PageTransitionLoader
+              targetTab={transitionTargetTab}
+              mode={themeMode}
+              onFinish={() => setIsPageTransitioning(false)}
+            />
+          )}
 
           {/* Interactive Notifications Modal */}
           <NotificationsModal
@@ -123,7 +144,7 @@ export default function App() {
             notifications={notifications}
             onMarkAllAsRead={handleMarkAllAsRead}
             onSelectNotification={handleSelectNotification}
-            onNavigateTab={(tab) => setActiveTab(tab)}
+            onNavigateTab={(tab) => handleSwitchTab(tab)}
           />
         </View>
       )}

@@ -64,10 +64,10 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
       <Animated.View style={[styles.contentWrapper, { opacity: fadeAnim }]}>
         {/* Brand Emblem */}
         <View style={styles.emblemContainer}>
-          <View style={[styles.emblemIconBox, { backgroundColor: '#FFFFFF', borderColor: theme.border }]}>
+          <View style={[styles.emblemIconBox, { backgroundColor: theme.accentTint, borderColor: theme.border }]}>
             <Image
-              source={require('../../../assets/logo.png')}
-              style={{ width: 62, height: 62, borderRadius: 14 }}
+              source={require('../../../assets/logo_emblem.png')}
+              style={{ width: 54, height: 54 }}
               resizeMode="contain"
             />
           </View>
