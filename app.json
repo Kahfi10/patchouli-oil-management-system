@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "NilamHub",
+    "name": "SulingTrace",
     "slug": "patchouli-oil-management-system",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,10 +8,10 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kahfi10.nilamhub"
+      "bundleIdentifier": "com.kahfi10.sulingtrace"
     },
     "android": {
-      "package": "com.kahfi10.nilamhub",
+      "package": "com.kahfi10.sulingtrace",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/android-icon-foreground.png",

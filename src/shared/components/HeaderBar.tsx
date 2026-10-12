@@ -24,7 +24,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
       {/* Brand & Subtitle - Clean Apple Typography */}
       <View style={styles.brandContainer}>
         <View style={styles.titleRow}>
-          <Text style={[styles.brandTitle, { color: theme.text }]}>NilamHub</Text>
+          <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>
           <View style={[styles.verifiedBadge, { backgroundColor: theme.accentTint }]}>
             <ShieldCheck size={11} color={theme.accent} strokeWidth={2.2} />
             <Text style={[styles.verifiedText, { color: theme.accent }]}>SNI 06-2385</Text>

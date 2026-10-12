@@ -1,4 +1,4 @@
-# NilamHub: Patchouli Oil Management System 🌿
+# SulingTrace: Patchouli Oil Distillation & Traceability System 🌿
 
 [![Expo SDK 57](https://img.shields.io/badge/Expo-SDK%2057-000020.svg?logo=expo&style=flat-square)](https://expo.dev/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.86-61DAFB.svg?logo=react&style=flat-square)](https://reactnative.dev/)
@@ -7,7 +7,7 @@
 [![Architecture](https://img.shields.io/badge/Architecture-Offline--First-248A3D.svg?style=flat-square)](https://github.com/Kahfi10/patchouli-oil-management-system)
 [![Build APK](https://img.shields.io/badge/Release-APK%20Available-success.svg?style=flat-square)](https://expo.dev/artifacts/eas/QR3_x5HEdZgQBUqngzrOyayS16NA3Sk5OCoSeDAXvYw.apk)
 
-> **NilamHub** adalah aplikasi mobile cerdas berbasis *Offline-First* yang dirancang untuk mendigitalisasi rantai pasok dan pasca-panen minyak nilam (*Pogostemon cablin*). Menghubungkan petani dan penyuling rakyat dengan transparansi harga regional, kalkulasi rendemen presisi, paspor mutu digital (QR traceability), stopwatch boiler penyulingan, dan diagnostik patologi daun.
+> **SulingTrace** adalah aplikasi mobile cerdas berbasis *Offline-First* yang dirancang untuk mendigitalisasi rantai pasok dan pasca-panen minyak nilam (*Pogostemon cablin*). Menghubungkan petani dan penyuling rakyat dengan transparansi harga regional, kalkulasi rendemen presisi, paspor mutu digital (QR traceability), stopwatch boiler penyulingan, dan diagnostik patologi daun.
 
 ---
 

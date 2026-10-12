@@ -67,7 +67,7 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
           <View style={[styles.emblemIconBox, { backgroundColor: theme.accentTint, borderColor: theme.border }]}>
             <Sparkles size={38} color={theme.accent} strokeWidth={2.2} />
           </View>
-          <Text style={[styles.brandTitle, { color: theme.text }]}>NilamHub</Text>
+          <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>
           <Text style={[styles.brandSubtitle, { color: theme.textSecondary }]}>
             Patchouli Oil Management & Traceability System
           </Text>

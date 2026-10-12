@@ -8,7 +8,7 @@ import { DistillationBatch } from '../../data/mockData';
 export const shareBatchToWhatsApp = async (batch: DistillationBatch): Promise<void> => {
   const text = 
 `*LAPORAN BATCH SULING MINYAK NILAM*
-*NilamHub - Standar Telusur Mutu SNI*
+*SulingTrace - Standar Telusur Mutu SNI*
 ----------------------------------------
 Kode Batch: *${batch.batchCode}*
 Penyuling: ${batch.farmerName}
@@ -27,7 +27,7 @@ Tanggal Suling: ${batch.distilledAt}
 - Sertifikat Uji: ${batch.labCertificateNo}
 - Status: ${batch.status}
 ----------------------------------------
-_Diverifikasi melalui NilamHub Traceability Platform_`;
+_Diverifikasi melalui SulingTrace Traceability Platform_`;
 
   try {
     if (Platform.OS === 'web') {
@@ -63,7 +63,7 @@ export const shareYieldCalculation = async (data: {
 
   const text =
 `*SIMULASI RENDEMEN & HPP SULING NILAM*
-*NilamHub Calculator*
+*SulingTrace Calculator*
 ----------------------------------------
 Bahan Baku Daun: *${formatKg(data.dryLeavesKg)}*
 Target Rendemen: *${formatPercent(data.yieldRate)}*
@@ -80,7 +80,7 @@ Estimasi Minyak Murni: *${data.oilKg.toFixed(2)} kg* (~${(data.oilKg * 1.05).toF
 - Estimasi Omset: ${formatRupiah(grossRevenue)}
 - Estimasi Laba Bersih: *${formatRupiah(data.netProfit)}* (Margin ${margin.toFixed(1)}%)
 ----------------------------------------
-_Dihitung via NilamHub - Kalkulator Atsiri Terintegrasi_`;
+_Dihitung via SulingTrace - Kalkulator Ketel Terintegrasi_`;
 
   try {
     if (Platform.OS === 'web') {
