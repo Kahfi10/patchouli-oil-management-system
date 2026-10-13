@@ -117,8 +117,17 @@ export default function App() {
             activeNotificationsCount={unreadCount}
           />
 
-          {/* Content Body */}
-          <View style={styles.body}>{renderActiveScreen()}</View>
+          {/* Content Body with Seamless In-Place Page Skeleton Loader */}
+          <View style={styles.body}>
+            {renderActiveScreen()}
+            {isPageTransitioning && (
+              <PageSkeletonLoader
+                mode={themeMode}
+                targetTab={transitionTargetTab}
+                onFinish={() => setIsPageTransitioning(false)}
+              />
+            )}
+          </View>
 
           {/* Bottom Apple Style Tab Bar */}
           <BottomNav
@@ -126,14 +135,6 @@ export default function App() {
             onChangeTab={handleSwitchTab}
             mode={themeMode}
           />
-
-          {/* Minimalist Skeleton Transition with Logo Watermark */}
-          {isPageTransitioning && (
-            <PageSkeletonLoader
-              mode={themeMode}
-              onFinish={() => setIsPageTransitioning(false)}
-            />
-          )}
 
           {/* Interactive Notifications Modal */}
           <NotificationsModal
@@ -161,5 +162,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
+    position: 'relative',
+    overflow: 'hidden',
   },
 });
