@@ -43,120 +43,73 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
   onFinish,
 }) => {
   const theme = getAppleTheme(mode);
-  const pulseAnim = useRef(new Animated.Value(0.35)).current;
-  const scaleAnim = useRef(new Animated.Value(0.96)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  // 3-dot wave pulse animators
-  const dot1Anim = useRef(new Animated.Value(0.25)).current;
-  const dot2Anim = useRef(new Animated.Value(0.25)).current;
-  const dot3Anim = useRef(new Animated.Value(0.25)).current;
+  const shimmerAnim = useRef(new Animated.Value(0.4)).current;
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   const tabMeta = TAB_TITLES[targetTab] || TAB_TITLES.beranda;
 
   useEffect(() => {
-    // 0. Smooth cross-dissolve entrance
+    // 1. Smooth Fade In (110ms)
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 70,
+      duration: 110,
+      easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start();
 
-    // 1. Shimmer pulse loop for skeleton blocks
-    const loopPulse = Animated.loop(
+    // 2. Gentle hairline progress fill
+    Animated.timing(progressAnim, {
+      toValue: 1,
+      duration: 240,
+      easing: Easing.inOut(Easing.quad),
+      useNativeDriver: false,
+    }).start();
+
+    // 3. Calm shimmer loop for background placeholders
+    const shimmerLoop = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 0.8,
-          duration: 380,
+        Animated.timing(shimmerAnim, {
+          toValue: 0.75,
+          duration: 340,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-        Animated.timing(pulseAnim, {
-          toValue: 0.35,
-          duration: 380,
+        Animated.timing(shimmerAnim, {
+          toValue: 0.4,
+          duration: 340,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
       ])
     );
-    loopPulse.start();
+    shimmerLoop.start();
 
-    // 2. Gentle breathing scale loop for logo emblem
-    const loopScale = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.05,
-          duration: 420,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 0.96,
-          duration: 420,
-          easing: Easing.inOut(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ])
-    );
-    loopScale.start();
-
-    // 3. Staggered 3-dot wave animation
-    const animateDot = (anim: Animated.Value, delay: number) => {
-      return Animated.loop(
-        Animated.sequence([
-          Animated.delay(delay),
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 220,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-          Animated.timing(anim, {
-            toValue: 0.25,
-            duration: 220,
-            easing: Easing.inOut(Easing.sin),
-            useNativeDriver: true,
-          }),
-          Animated.delay(Math.max(0, 320 - delay)),
-        ])
-      );
-    };
-
-    const loopDot1 = animateDot(dot1Anim, 0);
-    const loopDot2 = animateDot(dot2Anim, 120);
-    const loopDot3 = animateDot(dot3Anim, 240);
-
-    loopDot1.start();
-    loopDot2.start();
-    loopDot3.start();
-
-    // 4. Snappy auto-transition timing (260ms active -> 90ms fadeout)
+    // 4. Smooth Fade Out (130ms) -> in and in-out transition
     const timer = setTimeout(() => {
       Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 90,
+        duration: 130,
+        easing: Easing.in(Easing.quad),
         useNativeDriver: true,
       }).start(() => {
-        loopPulse.stop();
-        loopScale.stop();
-        loopDot1.stop();
-        loopDot2.stop();
-        loopDot3.stop();
+        shimmerLoop.stop();
         if (onFinish) onFinish();
       });
-    }, 260);
+    }, 180);
 
     return () => {
       clearTimeout(timer);
-      loopPulse.stop();
-      loopScale.stop();
-      loopDot1.stop();
-      loopDot2.stop();
-      loopDot3.stop();
+      shimmerLoop.stop();
     };
   }, []);
 
   const skeletonColor = theme.surfaceSecondary;
+
+  const progressWidth = progressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['10%', '100%'],
+  });
 
   return (
     <Animated.View
@@ -175,146 +128,136 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
           <Text style={[styles.targetTitleText, { color: theme.text }]}>
             {tabMeta.title}
           </Text>
-        <Animated.View
-          style={[
-            styles.subtitleSkeletonBar,
-            { backgroundColor: skeletonColor, opacity: pulseAnim },
-          ]}
-        />
-      </View>
+          <Animated.View
+            style={[
+              styles.subtitleSkeletonBar,
+              { backgroundColor: skeletonColor, opacity: shimmerAnim },
+            ]}
+          />
+        </View>
 
-      {/* 2. Hero Brand Beacon Card (Pristine Symmetrical Island) */}
-      <View
-        style={[
-          styles.heroCard,
-          {
-            backgroundColor: theme.surface,
-            borderColor: theme.border,
-            shadowColor: theme.cardShadow,
-          },
-        ]}
-      >
-        {/* Isolated Textless Emblem Squircle */}
-        <Animated.View
+        {/* 2. Hero Brand Beacon Card (Simple, Pure, Serene) */}
+        <View
           style={[
-            styles.emblemBadge,
+            styles.heroCard,
             {
-              backgroundColor: theme.accentTint,
+              backgroundColor: theme.surface,
               borderColor: theme.border,
-              transform: [{ scale: scaleAnim }],
+              shadowColor: theme.cardShadow,
             },
           ]}
         >
-          <Image
-            source={require('../../../assets/logo_emblem.png')}
-            style={styles.emblemIcon}
-            resizeMode="contain"
-          />
-        </Animated.View>
-
-        {/* Crisp Loading Subtitle */}
-        <Text style={[styles.loadingLabel, { color: theme.textSecondary }]}>
-          {tabMeta.subtitle}
-        </Text>
-
-        {/* Apple 3-Dot Staggered Wave Pulse */}
-        <View style={styles.dotsRow}>
-          <Animated.View
+          {/* Isolated Textless Emblem Squircle */}
+          <View
             style={[
-              styles.dot,
-              { backgroundColor: theme.accent, opacity: dot1Anim },
+              styles.emblemBadge,
+              {
+                backgroundColor: theme.accentTint,
+                borderColor: theme.border,
+              },
             ]}
-          />
-          <Animated.View
-            style={[
-              styles.dot,
-              { backgroundColor: theme.accent, opacity: dot2Anim },
-            ]}
-          />
-          <Animated.View
-            style={[
-              styles.dot,
-              { backgroundColor: theme.accent, opacity: dot3Anim },
-            ]}
-          />
-        </View>
-      </View>
-
-      {/* 3. Symmetrical Bento Skeleton Cards */}
-      <View style={styles.skeletonList}>
-        {/* Metric Summary Skeleton */}
-        <View
-          style={[
-            styles.metricCardSkeleton,
-            { backgroundColor: theme.surface, borderColor: theme.border },
-          ]}
-        >
-          <View style={styles.metricTopRow}>
-            <Animated.View
-              style={[
-                styles.smallBadgeBar,
-                { backgroundColor: skeletonColor, opacity: pulseAnim },
-              ]}
+          >
+            <Image
+              source={require('../../../assets/logo_emblem.png')}
+              style={styles.emblemIcon}
+              resizeMode="contain"
             />
+          </View>
+
+          {/* Crisp Loading Subtitle */}
+          <Text style={[styles.loadingLabel, { color: theme.textSecondary }]}>
+            {tabMeta.subtitle}
+          </Text>
+
+          {/* Simple Hairline Accent Progress Track */}
+          <View style={[styles.hairlineTrack, { backgroundColor: theme.surfaceSecondary }]}>
             <Animated.View
               style={[
-                styles.smallPillBar,
-                { backgroundColor: skeletonColor, opacity: pulseAnim },
+                styles.hairlineBar,
+                {
+                  backgroundColor: theme.accent,
+                  width: progressWidth,
+                },
               ]}
             />
           </View>
-          <Animated.View
-            style={[
-              styles.largeMetricBar,
-              { backgroundColor: skeletonColor, opacity: pulseAnim },
-            ]}
-          />
-          <Animated.View
-            style={[
-              styles.metricDetailBar,
-              { backgroundColor: skeletonColor, opacity: pulseAnim },
-            ]}
-          />
         </View>
 
-        {/* Symmetrical List Item Skeleton */}
-        <View
-          style={[
-            styles.rowCardSkeleton,
-            { backgroundColor: theme.surface, borderColor: theme.border },
-          ]}
-        >
-          <Animated.View
+        {/* 3. Symmetrical Bento Skeleton Cards */}
+        <View style={styles.skeletonList}>
+          {/* Metric Summary Skeleton */}
+          <View
             style={[
-              styles.iconBoxSkeleton,
-              { backgroundColor: skeletonColor, opacity: pulseAnim },
+              styles.metricCardSkeleton,
+              { backgroundColor: theme.surface, borderColor: theme.border },
             ]}
-          />
-          <View style={styles.rowTextCol}>
+          >
+            <View style={styles.metricTopRow}>
+              <Animated.View
+                style={[
+                  styles.smallBadgeBar,
+                  { backgroundColor: skeletonColor, opacity: shimmerAnim },
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.smallPillBar,
+                  { backgroundColor: skeletonColor, opacity: shimmerAnim },
+                ]}
+              />
+            </View>
             <Animated.View
               style={[
-                styles.rowTitleBar,
-                { backgroundColor: skeletonColor, opacity: pulseAnim },
+                styles.largeMetricBar,
+                { backgroundColor: skeletonColor, opacity: shimmerAnim },
               ]}
             />
             <Animated.View
               style={[
-                styles.rowSubBar,
-                { backgroundColor: skeletonColor, opacity: pulseAnim },
+                styles.metricDetailBar,
+                { backgroundColor: skeletonColor, opacity: shimmerAnim },
               ]}
             />
           </View>
-          <Animated.View
+
+          {/* Symmetrical List Item Skeleton */}
+          <View
             style={[
-              styles.actionPillBar,
-              { backgroundColor: skeletonColor, opacity: pulseAnim },
+              styles.rowCardSkeleton,
+              { backgroundColor: theme.surface, borderColor: theme.border },
             ]}
-          />
+          >
+            <Animated.View
+              style={[
+                styles.iconBoxSkeleton,
+                { backgroundColor: skeletonColor, opacity: shimmerAnim },
+              ]}
+            />
+            <View style={styles.rowTextCol}>
+              <Animated.View
+                style={[
+                  styles.rowTitleBar,
+                  { backgroundColor: skeletonColor, opacity: shimmerAnim },
+                ]}
+              />
+              <Animated.View
+                style={[
+                  styles.rowSubBar,
+                  { backgroundColor: skeletonColor, opacity: shimmerAnim },
+                ]}
+              />
+            </View>
+            <Animated.View
+              style={[
+                styles.actionPillBar,
+                { backgroundColor: skeletonColor, opacity: shimmerAnim },
+              ]}
+            />
+          </View>
         </View>
       </View>
-    </View>
-  </Animated.View>
-);
+    </Animated.View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -362,8 +305,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   emblemBadge: {
-    width: 62,
-    height: 62,
+    width: 60,
+    height: 60,
     borderRadius: 18,
     borderWidth: 1,
     alignItems: 'center',
@@ -375,8 +318,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   emblemIcon: {
-    width: 40,
-    height: 40,
+    width: 38,
+    height: 38,
   },
   loadingLabel: {
     fontFamily: SANS_FONT,
@@ -386,17 +329,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
     textAlign: 'center',
   },
-  dotsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
+  hairlineTrack: {
+    width: 120,
+    height: 3,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginTop: 10,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginHorizontal: 3.5,
+  hairlineBar: {
+    height: '100%',
+    borderRadius: 2,
   },
   skeletonList: {
     gap: 12,
@@ -466,4 +408,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+
 

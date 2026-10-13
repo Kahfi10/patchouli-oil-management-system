@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, SafeAreaView, StatusBar, Platform } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, SafeAreaView, StatusBar, Platform, Animated, Easing } from 'react-native';
 import { HeaderBar } from './src/shared/components/HeaderBar';
 import { BottomNav, TabId } from './src/shared/components/BottomNav';
 import { MarketTickerScreen } from './src/features/market-ticker/MarketTickerScreen';
@@ -23,7 +23,8 @@ export default function App() {
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AppNotification[]>(MOCK_NOTIFICATIONS);
 
-  // Smooth page transition state with textless logo emblem
+  // Simple, silky Fade In and Out screen transitions
+  const contentFadeAnim = useRef(new Animated.Value(1)).current;
   const [isPageTransitioning, setIsPageTransitioning] = useState<boolean>(false);
   const [transitionTargetTab, setTransitionTargetTab] = useState<TabId>('beranda');
 
@@ -46,7 +47,27 @@ export default function App() {
     if (newTab === activeTab) return;
     setTransitionTargetTab(newTab);
     setIsPageTransitioning(true);
-    setActiveTab(newTab);
+
+    // 1. Smooth Fade Out of current screen (120ms)
+    Animated.timing(contentFadeAnim, {
+      toValue: 0,
+      duration: 120,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: true,
+    }).start(() => {
+      // 2. Switch tab content while invisible
+      setActiveTab(newTab);
+
+      // 3. Smooth Fade In of new screen (160ms)
+      Animated.timing(contentFadeAnim, {
+        toValue: 1,
+        duration: 160,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
+      }).start(() => {
+        setIsPageTransitioning(false);
+      });
+    });
   };
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
@@ -117,9 +138,11 @@ export default function App() {
             activeNotificationsCount={unreadCount}
           />
 
-          {/* Content Body with Seamless In-Place Page Skeleton Loader */}
+          {/* Content Body with Silky Fade In & Fade Out Transition */}
           <View style={styles.body}>
-            {renderActiveScreen()}
+            <Animated.View style={[styles.screenWrapper, { opacity: contentFadeAnim }]}>
+              {renderActiveScreen()}
+            </Animated.View>
             {isPageTransitioning && (
               <PageSkeletonLoader
                 mode={themeMode}
@@ -164,5 +187,8 @@ const styles = StyleSheet.create({
     flex: 1,
     position: 'relative',
     overflow: 'hidden',
+  },
+  screenWrapper: {
+    flex: 1,
   },
 });

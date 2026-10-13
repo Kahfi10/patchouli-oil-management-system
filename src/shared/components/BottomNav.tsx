@@ -31,58 +31,35 @@ const BottomNavItem: React.FC<BottomNavItemProps> = ({
   onPress,
   theme,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const pillOpacity = useRef(new Animated.Value(isActive ? 1 : 0)).current;
 
   useEffect(() => {
-    if (isActive) {
-      Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 0.86,
-          duration: 80,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          friction: 4,
-          tension: 160,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
+    Animated.timing(pillOpacity, {
+      toValue: isActive ? 1 : 0,
+      duration: 140,
+      useNativeDriver: true,
+    }).start();
   }, [isActive]);
-
-  const handlePress = () => {
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.82,
-        duration: 70,
-        useNativeDriver: true,
-      }),
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        friction: 4,
-        tension: 160,
-        useNativeDriver: true,
-      }),
-    ]).start();
-    onPress();
-  };
 
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={handlePress}
+      activeOpacity={0.75}
+      onPress={onPress}
       style={styles.tabButton}
     >
-      <Animated.View
-        style={[
-          styles.iconContainer,
-          isActive && [styles.activeIconPill, { backgroundColor: theme.accentTint }],
-          { transform: [{ scale: scaleAnim }] },
-        ]}
-      >
+      <View style={styles.iconContainer}>
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFill,
+            styles.activeIconPill,
+            {
+              backgroundColor: theme.accentTint,
+              opacity: pillOpacity,
+            },
+          ]}
+        />
         {tab.icon(isActive)}
-      </Animated.View>
+      </View>
       <Text
         style={[
           styles.tabLabel,
