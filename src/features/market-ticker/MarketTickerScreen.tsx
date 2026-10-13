@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Easing } from 'react-native';
 import { ArrowUpRight, ArrowDownRight, ChevronRight, Calculator, ShoppingBag, Layers, Stethoscope, Clock, TrendingUp, Sparkles } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { InteractivePriceChart } from '../../shared/components/InteractivePriceChart';
@@ -20,6 +20,49 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
   const theme = getAppleTheme(mode);
   const [selectedRegion, setSelectedRegion] = useState<RegionalPrice>(REGIONAL_PRICES[0]);
 
+  // Live status beacon pulse
+  const beaconScale = useRef(new Animated.Value(1)).current;
+  const regionTransition = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loopBeacon = Animated.loop(
+      Animated.sequence([
+        Animated.timing(beaconScale, {
+          toValue: 1.5,
+          duration: 700,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(beaconScale, {
+          toValue: 1,
+          duration: 700,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loopBeacon.start();
+    return () => loopBeacon.stop();
+  }, []);
+
+  const handleSelectRegion = (region: RegionalPrice) => {
+    if (region.id === selectedRegion.id) return;
+    Animated.sequence([
+      Animated.timing(regionTransition, {
+        toValue: 0.94,
+        duration: 90,
+        useNativeDriver: true,
+      }),
+      Animated.spring(regionTransition, {
+        toValue: 1,
+        friction: 5,
+        tension: 140,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    setSelectedRegion(region);
+  };
+
   // Calculate national average
   const totalSum = REGIONAL_PRICES.reduce((acc, curr) => acc + curr.pricePerKg, 0);
   const nationalAvg = Math.round(totalSum / REGIONAL_PRICES.length);
@@ -39,7 +82,15 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
           </Text>
         </View>
         <View style={[styles.liveStatusBadge, { backgroundColor: theme.accentTint }]}>
-          <View style={[styles.liveDot, { backgroundColor: theme.accent }]} />
+          <Animated.View
+            style={[
+              styles.liveDot,
+              {
+                backgroundColor: theme.accent,
+                transform: [{ scale: beaconScale }],
+              },
+            ]}
+          />
           <Text style={[styles.liveStatusText, { color: theme.accent }]}>Live SNI</Text>
         </View>
       </View>
@@ -78,7 +129,7 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
             <TouchableOpacity
               key={item.id}
               activeOpacity={0.8}
-              onPress={() => setSelectedRegion(item)}
+              onPress={() => handleSelectRegion(item)}
               style={[
                 styles.segmentTab,
                 isSelected && [styles.segmentActive, { backgroundColor: theme.surface }],
@@ -100,7 +151,8 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
       </View>
 
       {/* Hero Price Inset Grouped Card with Interactive Chart */}
-      <BentoCard mode={mode} style={styles.heroCard}>
+      <Animated.View style={{ transform: [{ scale: regionTransition }] }}>
+        <BentoCard mode={mode} style={styles.heroCard}>
         <View style={styles.heroTopRow}>
           <View>
             <Text style={[styles.regionName, { color: theme.textSecondary }]}>
@@ -158,6 +210,7 @@ export const MarketTickerScreen: React.FC<MarketTickerScreenProps> = ({
           <ChevronRight size={15} color={theme.textTertiary} />
         </TouchableOpacity>
       </BentoCard>
+      </Animated.View>
 
       {/* Apple Inset Grouped Quick Actions */}
       <Text style={[styles.sectionHeading, { color: theme.textSecondary, marginTop: 22 }]}>

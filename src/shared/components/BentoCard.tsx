@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, StyleSheet, ViewStyle, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { View, StyleSheet, ViewStyle, TouchableOpacity, Animated } from 'react-native';
 import { getAppleTheme, ThemeMode } from '../theme/colors';
 
 interface BentoCardProps {
@@ -18,6 +18,7 @@ export const BentoCard: React.FC<BentoCardProps> = ({
   accentBorder = false,
 }) => {
   const theme = getAppleTheme(mode);
+  const pressScale = useRef(new Animated.Value(1)).current;
 
   const cardStyle = [
     styles.card,
@@ -30,14 +31,35 @@ export const BentoCard: React.FC<BentoCardProps> = ({
   ];
 
   if (onPress) {
+    const handlePressIn = () => {
+      Animated.timing(pressScale, {
+        toValue: 0.982,
+        duration: 90,
+        useNativeDriver: true,
+      }).start();
+    };
+
+    const handlePressOut = () => {
+      Animated.spring(pressScale, {
+        toValue: 1,
+        friction: 6,
+        tension: 180,
+        useNativeDriver: true,
+      }).start();
+    };
+
     return (
-      <TouchableOpacity
-        activeOpacity={0.7}
-        onPress={onPress}
-        style={cardStyle}
-      >
-        {children}
-      </TouchableOpacity>
+      <Animated.View style={{ transform: [{ scale: pressScale }] }}>
+        <TouchableOpacity
+          activeOpacity={0.88}
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={cardStyle}
+        >
+          {children}
+        </TouchableOpacity>
+      </Animated.View>
     );
   }
 
@@ -55,3 +77,4 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 });
+

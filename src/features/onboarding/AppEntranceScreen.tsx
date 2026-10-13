@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Image } from 'react-native';
 import { ShieldCheck, TrendingUp, Calculator, QrCode, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react-native';
 import { getAppleTheme, ThemeMode } from '../../shared/theme/colors';
@@ -17,6 +17,12 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
   const [fadeAnim] = useState(new Animated.Value(0));
   const [showWelcome, setShowWelcome] = useState(false);
 
+  // Animations
+  const emblemScaleAnim = useRef(new Animated.Value(0.96)).current;
+  const welcomeSlideAnim = useRef(new Animated.Value(24)).current;
+  const welcomeFadeAnim = useRef(new Animated.Value(0)).current;
+  const startBtnScale = useRef(new Animated.Value(1)).current;
+
   const loadingSteps = [
     'Inisialisasi database penyimpanan lokal (AsyncStorage)...',
     'Memuat standar SNI 06-2385 & acuan bursa 4 regional...',
@@ -28,9 +34,28 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
     // Fade in emblem
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 600,
+      duration: 500,
       useNativeDriver: true,
     }).start();
+
+    // Emblem breathing scale loop
+    const loopEmblem = Animated.loop(
+      Animated.sequence([
+        Animated.timing(emblemScaleAnim, {
+          toValue: 1.05,
+          duration: 900,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(emblemScaleAnim, {
+          toValue: 0.96,
+          duration: 900,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loopEmblem.start();
 
     // Progress bar animation
     Animated.timing(progressWidth, {
@@ -44,9 +69,25 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
     const t1 = setTimeout(() => setLoadingStep(1), 400);
     const t2 = setTimeout(() => setLoadingStep(2), 900);
     const t3 = setTimeout(() => setLoadingStep(3), 1400);
-    const t4 = setTimeout(() => setShowWelcome(true), 1800);
+    const t4 = setTimeout(() => {
+      setShowWelcome(true);
+      Animated.parallel([
+        Animated.spring(welcomeSlideAnim, {
+          toValue: 0,
+          friction: 6,
+          tension: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(welcomeFadeAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 1800);
 
     return () => {
+      loopEmblem.stop();
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
@@ -64,13 +105,22 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
       <Animated.View style={[styles.contentWrapper, { opacity: fadeAnim }]}>
         {/* Brand Emblem */}
         <View style={styles.emblemContainer}>
-          <View style={[styles.emblemIconBox, { backgroundColor: theme.accentTint, borderColor: theme.border }]}>
+          <Animated.View
+            style={[
+              styles.emblemIconBox,
+              {
+                backgroundColor: theme.accentTint,
+                borderColor: theme.border,
+                transform: [{ scale: emblemScaleAnim }],
+              },
+            ]}
+          >
             <Image
               source={require('../../../assets/logo_emblem.png')}
               style={{ width: 54, height: 54 }}
               resizeMode="contain"
             />
-          </View>
+          </Animated.View>
           <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>
           <Text style={[styles.brandSubtitle, { color: theme.textSecondary }]}>
             Patchouli Oil Management & Traceability System
@@ -114,8 +164,16 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
             </TouchableOpacity>
           </View>
         ) : (
-          /* Welcome Onboarding Feature Snapshot */
-          <View style={styles.welcomeContainer}>
+          /* Welcome Onboarding Feature Snapshot with Staggered Slide */
+          <Animated.View
+            style={[
+              styles.welcomeContainer,
+              {
+                opacity: welcomeFadeAnim,
+                transform: [{ translateY: welcomeSlideAnim }],
+              },
+            ]}
+          >
             <Text style={[styles.welcomeHeading, { color: theme.textSecondary }]}>
               FITUR UTAMA APLIKASI
             </Text>
@@ -158,16 +216,27 @@ export const AppEntranceScreen: React.FC<AppEntranceScreenProps> = ({ mode, onFi
               </View>
             </View>
 
-            {/* Launch Button */}
+            {/* Launch Button with Tactile Spring */}
             <TouchableOpacity
-              activeOpacity={0.8}
+              activeOpacity={0.85}
               onPress={onFinish}
-              style={[styles.startBtn, { backgroundColor: theme.accent }]}
+              onPressIn={() => Animated.timing(startBtnScale, { toValue: 0.96, duration: 80, useNativeDriver: true }).start()}
+              onPressOut={() => Animated.spring(startBtnScale, { toValue: 1, friction: 4, tension: 160, useNativeDriver: true }).start()}
             >
-              <Text style={styles.startBtnText}>Mulai Aplikasi</Text>
-              <ArrowRight size={18} color="#FFFFFF" strokeWidth={2.4} />
+              <Animated.View
+                style={[
+                  styles.startBtn,
+                  {
+                    backgroundColor: theme.accent,
+                    transform: [{ scale: startBtnScale }],
+                  },
+                ]}
+              >
+                <Text style={styles.startBtnText}>Mulai Aplikasi</Text>
+                <ArrowRight size={18} color="#FFFFFF" strokeWidth={2.4} />
+              </Animated.View>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         )}
       </Animated.View>
     </View>

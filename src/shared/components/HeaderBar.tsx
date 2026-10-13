@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Animated, Easing } from 'react-native';
 import { Bell, Sun, Moon, ShieldCheck, HelpCircle } from 'lucide-react-native';
 import { getAppleTheme, ThemeMode } from '../theme/colors';
 import { SANS_FONT } from '../theme/typography';
@@ -21,16 +21,84 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
 }) => {
   const theme = getAppleTheme(mode);
 
+  // Animated values
+  const modeRotateAnim = useRef(new Animated.Value(mode === 'dark' ? 1 : 0)).current;
+  const bellScaleAnim = useRef(new Animated.Value(1)).current;
+  const emblemScaleAnim = useRef(new Animated.Value(1)).current;
+
+  // 1. Emblem subtle breathing animation
+  useEffect(() => {
+    const loopEmblem = Animated.loop(
+      Animated.sequence([
+        Animated.timing(emblemScaleAnim, {
+          toValue: 1.08,
+          duration: 900,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(emblemScaleAnim, {
+          toValue: 0.95,
+          duration: 900,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loopEmblem.start();
+    return () => loopEmblem.stop();
+  }, []);
+
+  // 2. Animate theme icon rotation on mode change
+  useEffect(() => {
+    Animated.spring(modeRotateAnim, {
+      toValue: mode === 'dark' ? 1 : 0,
+      friction: 5,
+      tension: 120,
+      useNativeDriver: true,
+    }).start();
+  }, [mode]);
+
+  // 3. Subtle notification pulse if unread exists
+  useEffect(() => {
+    if (activeNotificationsCount > 0) {
+      const loopBell = Animated.loop(
+        Animated.sequence([
+          Animated.delay(3500),
+          Animated.timing(bellScaleAnim, {
+            toValue: 1.25,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.spring(bellScaleAnim, {
+            toValue: 1,
+            friction: 3,
+            tension: 200,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+      loopBell.start();
+      return () => loopBell.stop();
+    }
+  }, [activeNotificationsCount]);
+
+  const spin = modeRotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
+
   return (
     <View style={[styles.container, { backgroundColor: theme.surface, borderBottomColor: theme.border }]}>
       {/* Brand & Subtitle - Clean Apple Typography */}
       <View style={styles.brandContainer}>
         <View style={styles.titleRow}>
-          <Image
-            source={require('../../../assets/logo_emblem.png')}
-            style={{ width: 24, height: 24, marginRight: 4 }}
-            resizeMode="contain"
-          />
+          <Animated.View style={{ transform: [{ scale: emblemScaleAnim }] }}>
+            <Image
+              source={require('../../../assets/logo_emblem.png')}
+              style={{ width: 24, height: 24, marginRight: 4 }}
+              resizeMode="contain"
+            />
+          </Animated.View>
           <Text style={[styles.brandTitle, { color: theme.text }]}>SulingTrace</Text>
           <View style={[styles.verifiedBadge, { backgroundColor: theme.accentTint }]}>
             <ShieldCheck size={11} color={theme.accent} strokeWidth={2.2} />
@@ -59,11 +127,13 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
           onPress={onToggleMode}
           style={[styles.iconButton, { backgroundColor: theme.surfaceSecondary }]}
         >
-          {mode === 'dark' ? (
-            <Sun size={17} color={theme.text} strokeWidth={2} />
-          ) : (
-            <Moon size={17} color={theme.text} strokeWidth={2} />
-          )}
+          <Animated.View style={{ transform: [{ rotate: spin }] }}>
+            {mode === 'dark' ? (
+              <Sun size={17} color={theme.text} strokeWidth={2} />
+            ) : (
+              <Moon size={17} color={theme.text} strokeWidth={2} />
+            )}
+          </Animated.View>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -73,15 +143,21 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
         >
           <Bell size={17} color={theme.text} strokeWidth={2} />
           {activeNotificationsCount > 0 && (
-            <View style={styles.notifBadge}>
+            <Animated.View
+              style={[
+                styles.notifBadge,
+                { transform: [{ scale: bellScaleAnim }] },
+              ]}
+            >
               <Text style={styles.notifText}>{activeNotificationsCount}</Text>
-            </View>
+            </Animated.View>
           )}
         </TouchableOpacity>
       </View>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

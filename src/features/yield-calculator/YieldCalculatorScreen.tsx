@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Animated } from 'react-native';
 import { CheckCircle2, MessageSquareShare, Plus, Minus, Sparkles, TrendingUp, DollarSign, Scale, Flame } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { formatRupiah, formatPercent } from '../../shared/utils/formatters';
@@ -37,6 +37,25 @@ export const YieldCalculatorScreen: React.FC<YieldCalculatorScreenProps> = ({ mo
   const grossRevenue = estimatedOilKg * priceKg;
   const netProfit = grossRevenue - totalCost;
   const profitMargin = grossRevenue > 0 ? (netProfit / grossRevenue) * 100 : 0;
+
+  // Reactive result pop animator
+  const resultScaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(resultScaleAnim, {
+        toValue: 1.05,
+        duration: 90,
+        useNativeDriver: true,
+      }),
+      Animated.spring(resultScaleAnim, {
+        toValue: 1,
+        friction: 5,
+        tension: 160,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [estimatedOilKg, netProfit]);
 
   // Presets
   const quickWeightPresets = [250, 500, 750, 1000];
@@ -323,7 +342,7 @@ export const YieldCalculatorScreen: React.FC<YieldCalculatorScreenProps> = ({ mo
           </View>
         </View>
 
-        <View style={styles.resultHeroRow}>
+        <Animated.View style={[styles.resultHeroRow, { transform: [{ scale: resultScaleAnim }] }]}>
           <Text style={[styles.oilNumber, { color: theme.text }]}>
             {estimatedOilKg.toFixed(2)}{' '}
             <Text style={[styles.oilUnit, { color: theme.textSecondary }]}>kg</Text>
@@ -333,7 +352,7 @@ export const YieldCalculatorScreen: React.FC<YieldCalculatorScreenProps> = ({ mo
               &asymp; {(estimatedOilKg * 1.05).toFixed(1)} Liter
             </Text>
           </View>
-        </View>
+        </Animated.View>
 
         <View style={[styles.rowDivider, { backgroundColor: theme.border, marginVertical: 14 }]} />
 

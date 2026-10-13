@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Animated, Easing } from 'react-native';
 import { QrCode, Plus, CheckCircle2, X, Share2, Layers, Clock, MessageSquareShare, Sparkles, Flame, ShieldCheck, Minus } from 'lucide-react-native';
 import { BentoCard } from '../../shared/components/BentoCard';
 import { DistillationBatch } from '../../data/mockData';
@@ -21,6 +21,30 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
 
   // Timer modal state
   const [showTimerModal, setShowTimerModal] = useState<boolean>(false);
+
+  // Kettle beacon animation
+  const kettleBeaconScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(kettleBeaconScale, {
+          toValue: 1.5,
+          duration: 700,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(kettleBeaconScale, {
+          toValue: 1,
+          duration: 700,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, []);
 
   // New batch form state
   const [showAddForm, setShowAddForm] = useState(false);
@@ -100,7 +124,15 @@ export const DistillationBatchScreen: React.FC<DistillationBatchScreenProps> = (
             <View style={styles.timerHeaderRow}>
               <Text style={[styles.timerTitle, { color: theme.text }]}>Stopwatch Ketel Suling</Text>
               <View style={[styles.timerLivePill, { backgroundColor: theme.accentTint }]}>
-                <View style={[styles.liveDot, { backgroundColor: theme.accent }]} />
+                <Animated.View
+                  style={[
+                    styles.liveDot,
+                    {
+                      backgroundColor: theme.accent,
+                      transform: [{ scale: kettleBeaconScale }],
+                    },
+                  ]}
+                />
                 <Text style={[styles.timerLiveText, { color: theme.accent }]}>Siap Suling</Text>
               </View>
             </View>

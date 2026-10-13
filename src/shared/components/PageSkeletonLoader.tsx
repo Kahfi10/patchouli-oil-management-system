@@ -45,7 +45,7 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
   const theme = getAppleTheme(mode);
   const pulseAnim = useRef(new Animated.Value(0.35)).current;
   const scaleAnim = useRef(new Animated.Value(0.96)).current;
-  const fadeOutAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // 3-dot wave pulse animators
   const dot1Anim = useRef(new Animated.Value(0.25)).current;
@@ -55,6 +55,13 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
   const tabMeta = TAB_TITLES[targetTab] || TAB_TITLES.beranda;
 
   useEffect(() => {
+    // 0. Smooth cross-dissolve entrance
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 70,
+      useNativeDriver: true,
+    }).start();
+
     // 1. Shimmer pulse loop for skeleton blocks
     const loopPulse = Animated.loop(
       Animated.sequence([
@@ -123,11 +130,11 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
     loopDot2.start();
     loopDot3.start();
 
-    // 4. Snappy auto-transition timing (280ms active -> 100ms fadeout)
+    // 4. Snappy auto-transition timing (260ms active -> 90ms fadeout)
     const timer = setTimeout(() => {
-      Animated.timing(fadeOutAnim, {
+      Animated.timing(fadeAnim, {
         toValue: 0,
-        duration: 100,
+        duration: 90,
         useNativeDriver: true,
       }).start(() => {
         loopPulse.stop();
@@ -137,7 +144,7 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
         loopDot3.stop();
         if (onFinish) onFinish();
       });
-    }, 280);
+    }, 260);
 
     return () => {
       clearTimeout(timer);
@@ -158,7 +165,7 @@ export const PageSkeletonLoader: React.FC<PageSkeletonLoaderProps> = ({
         styles.container,
         {
           backgroundColor: theme.canvas,
-          opacity: fadeOutAnim,
+          opacity: fadeAnim,
         },
       ]}
     >

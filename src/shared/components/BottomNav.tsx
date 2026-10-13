@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { LayoutDashboard, Calculator, ShoppingBag, Layers, ShieldCheck } from 'lucide-react-native';
 import { getAppleTheme, ThemeMode } from '../theme/colors';
 import { SANS_FONT } from '../theme/typography';
@@ -12,6 +12,90 @@ interface BottomNavProps {
   mode: ThemeMode;
 }
 
+interface TabDef {
+  id: TabId;
+  label: string;
+  icon: (isActive: boolean) => React.ReactNode;
+}
+
+interface BottomNavItemProps {
+  tab: TabDef;
+  isActive: boolean;
+  onPress: () => void;
+  theme: ReturnType<typeof getAppleTheme>;
+}
+
+const BottomNavItem: React.FC<BottomNavItemProps> = ({
+  tab,
+  isActive,
+  onPress,
+  theme,
+}) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (isActive) {
+      Animated.sequence([
+        Animated.timing(scaleAnim, {
+          toValue: 0.86,
+          duration: 80,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 160,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isActive]);
+
+  const handlePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 0.82,
+        duration: 70,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 4,
+        tension: 160,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    onPress();
+  };
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={handlePress}
+      style={styles.tabButton}
+    >
+      <Animated.View
+        style={[
+          styles.iconContainer,
+          isActive && [styles.activeIconPill, { backgroundColor: theme.accentTint }],
+          { transform: [{ scale: scaleAnim }] },
+        ]}
+      >
+        {tab.icon(isActive)}
+      </Animated.View>
+      <Text
+        style={[
+          styles.tabLabel,
+          { color: isActive ? theme.accent : theme.textTertiary },
+          isActive && { fontWeight: '700' },
+        ]}
+      >
+        {tab.label}
+      </Text>
+    </TouchableOpacity>
+  );
+};
+
 export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onChangeTab,
@@ -19,15 +103,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 }) => {
   const theme = getAppleTheme(mode);
 
-  const tabs: { id: TabId; label: string; icon: (isActive: boolean) => React.ReactNode }[] = [
+  const tabs: TabDef[] = [
     {
       id: 'beranda',
       label: 'Beranda',
       icon: (isActive) => (
         <LayoutDashboard
-          size={20}
+          size={19}
           color={isActive ? theme.accent : theme.textTertiary}
-          strokeWidth={isActive ? 2.2 : 1.8}
+          strokeWidth={isActive ? 2.3 : 1.8}
         />
       ),
     },
@@ -36,9 +120,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       label: 'Kalkulator',
       icon: (isActive) => (
         <Calculator
-          size={20}
+          size={19}
           color={isActive ? theme.accent : theme.textTertiary}
-          strokeWidth={isActive ? 2.2 : 1.8}
+          strokeWidth={isActive ? 2.3 : 1.8}
         />
       ),
     },
@@ -47,9 +131,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       label: 'Bursa',
       icon: (isActive) => (
         <ShoppingBag
-          size={20}
+          size={19}
           color={isActive ? theme.accent : theme.textTertiary}
-          strokeWidth={isActive ? 2.2 : 1.8}
+          strokeWidth={isActive ? 2.3 : 1.8}
         />
       ),
     },
@@ -58,9 +142,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       label: 'Batch QR',
       icon: (isActive) => (
         <Layers
-          size={20}
+          size={19}
           color={isActive ? theme.accent : theme.textTertiary}
-          strokeWidth={isActive ? 2.2 : 1.8}
+          strokeWidth={isActive ? 2.3 : 1.8}
         />
       ),
     },
@@ -69,9 +153,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       label: 'Escrow',
       icon: (isActive) => (
         <ShieldCheck
-          size={20}
+          size={19}
           color={isActive ? theme.accent : theme.textTertiary}
-          strokeWidth={isActive ? 2.2 : 1.8}
+          strokeWidth={isActive ? 2.3 : 1.8}
         />
       ),
     },
@@ -79,28 +163,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
   return (
     <View style={[styles.container, { backgroundColor: theme.surface, borderTopColor: theme.border }]}>
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        return (
-          <TouchableOpacity
-            key={tab.id}
-            activeOpacity={0.7}
-            onPress={() => onChangeTab(tab.id)}
-            style={styles.tabButton}
-          >
-            <View style={styles.iconContainer}>{tab.icon(isActive)}</View>
-            <Text
-              style={[
-                styles.tabLabel,
-                { color: isActive ? theme.accent : theme.textTertiary },
-                isActive && { fontWeight: '600' },
-              ]}
-            >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+      {tabs.map((tab) => (
+        <BottomNavItem
+          key={tab.id}
+          tab={tab}
+          isActive={activeTab === tab.id}
+          onPress={() => onChangeTab(tab.id)}
+          theme={theme}
+        />
+      ))}
     </View>
   );
 };
@@ -110,8 +181,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingVertical: 8,
-    paddingBottom: 22,
+    paddingVertical: 7,
+    paddingBottom: 20,
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   tabButton: {
@@ -120,13 +191,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconContainer: {
-    height: 24,
+    height: 30,
+    width: 44,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  activeIconPill: {
+    borderRadius: 15,
   },
   tabLabel: {
     fontFamily: SANS_FONT,
     fontSize: 10,
-    marginTop: 3,
+    marginTop: 2,
   },
 });
+
